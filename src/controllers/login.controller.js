@@ -6,33 +6,26 @@ const User = require("../models/user");
 const loginCtrl = {};
 
 loginCtrl.login = async (req, res) => {
-  await User.findOne({ username: req.body.username.toLowerCase() }).then(
-    (user, err) => {
-      if (err) {
-        return res.json({
-          type: false,
-          message: `Error: $(err)`,
-        });
-      } else if (
-        !user ||
-        !bcrypt.compareSync(req.body.password, user.password)
-      ) {
-        res.json({
-          type: false,
-          data: "Nombre de usuario o contraseña incorrecta.",
-        });
-      } else {
-        console.log(!bcrypt.compareSync(req.body.password, user.password));
-        var token = jwt.sign({ userId: user._id }, jwtSecret, {
-          expiresIn: "24h",
-        });
-        res.json({
-          type: true,
-          data: user,
-          token,
-        });
-      }
+  const { email, password } = req.body;
+  await User.findOne({ email }).then((user, err) => {
+    if (err) {
+        res.status(500).json({
+        success: false,
+        message: `Error: $(err)`,
+      });
+    } else if (!user || !bcrypt.compareSync(password, user.password)) {
+      res.status(401).json({
+        success: false,
+        message: "Nombre de usuario o contraseña incorrecta.",
+      });
+    } else {
+      res.json({
+        success: true,
+        user,
+        token: jwt.sign({ user }, jwtSecret, { expiresIn: "24h" }),
+      });
     }
-  );
+  });
 };
+
 module.exports = loginCtrl;

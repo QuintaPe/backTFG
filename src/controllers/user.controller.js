@@ -1,5 +1,6 @@
 const User = require("../models/user");
 const bcrypt = require("bcrypt");
+const handleValidationError = require('../errors/handleValidationError')
 
 const userCtrl = {};
 
@@ -9,38 +10,16 @@ userCtrl.getUsers = async (req, res, next) => {
 };
 
 userCtrl.createUser = async (req, res, next) => {
-  req.body.username = req.body.username.toLowerCase();
-  await User.findOne({ username: req.body.username }).then((err, user) => {
-    if (err) {
-      return res.json({
-        type: false,
-        data: `Error: $(err)`,
-      });
-    } else if (user) {
-      return res.json({
-        type: false,
-        data: "El usuario ya existe.",
-      });
-    } else {
-      var newUser = new User({
-        username: req.body.username,
-        password: bcrypt.hashSync(req.body.password, 10),
-        rol: req.body.rol,
-        email: req.body.email,
-        name: req.body.name,
-        lastName: req.body.lastName,
-        birthDate: new Date(req.body.birthDate),
-        phone: req.body.phone,
-      });
+  const { _id, ...user } = req.body;
+  const newUser = new User({ ...user, password: bcrypt.hashSync(user.password, 10)});
 
-      newUser.save();
-
-      return res.json({
-        type: true,
-        data: "Nuevo usuario creado",
-      });
-    }
-  });
+  newUser.save()
+    .then(user => res.status(201).json({ success: true, user }))
+    .catch(err => {
+      if (err.name === 'ValidationError') {
+        return handleValidationError(err, req, res, next);
+      }
+    });
 };
 
 userCtrl.getUser = async (req, res, next) => {
@@ -52,7 +31,7 @@ userCtrl.getUser = async (req, res, next) => {
 userCtrl.editUser = async (req, res, next) => {
   const { id } = req.params;
   await User.findByIdAndUpdate(id, { $set: req.body }, { new: true });
-  res.json({ status: "User Updated" });
+  res.json({ status: "User Updated", user: req.body });
 };
 
 userCtrl.deleteUser = async (req, res, next) => {

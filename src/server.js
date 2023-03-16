@@ -1,6 +1,7 @@
 const express = require("express");
 const morgan = require("morgan");
 const cors = require("cors");
+const { authMiddleware } = require("./utils/middlewares");
 require('./database');
 
 // Initializations
@@ -12,15 +13,18 @@ app.set("port", process.env.PORT || 3000);
 
 
 // Middlewares
-app.use(cors({origin: 'http://localhost:4200'}));
+app.use(cors({
+    origin: 'http://localhost:4200',
+    credentials: true
+}));
 app.use(morgan("dev"));
 app.use(express.json());
 
 
 // Routes
-app.use('/api/users', require('./routes/user.routes'));
-app.use('/api/campings', require('./routes/camping.routes'));
-app.use('/api', require('./routes/login.routes'));
+app.use('/api/v1/users', authMiddleware, require('./routes/user.routes'));
+app.use('/api/v1/campings', authMiddleware, require('./routes/camping.routes'));
+app.use('/api/v1/', require('./routes/login.routes'));
 
 
 

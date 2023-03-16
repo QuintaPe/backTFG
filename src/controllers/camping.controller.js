@@ -1,41 +1,93 @@
-const Camping = require("../models/camping");
-const campingCtrl = {};
+const Joi = require('joi');
+const Camping = require('../models/camping');
+const { checkToken, validator } = require('../utils/functions');
+const campingController = {}
 
-campingCtrl.getCampings = async (req, res, next) => {
-    const camping = await Camping.find();
-    res.json(camping);
+
+// Get all campings
+campingController.getCampings = async (req, res, next) => {
+  const { error } = Joi.object({
+    page: Joi.number().integer().min(0).required(),
+    size: Joi.number().integer().min(0).required(),
+    search: Joi.string().optional().allow(null, ''),
+    filters: Joi.object().required(),
+    sort: Joi.string().optional().allow(null, ''),
+  }).validate(req.body);
+  
+  if (error) {
+    res.status(400).json({ error: error.details[0].message });
+    return -1;
+  }
+
+  const { page, size, search, filters, sort } = req.body;
+
+  if (req.user.role !== 'admin') {
+    filters.owner = req.user._id;
+  }
+
+  const response = await Camping.search(null, filters, size, page, sort ?? '-createdAt');
+  res.json(response);
 };
 
-campingCtrl.createCamping = async (req, res, next) => {
-    const camping = new Camping({
-        name: req.body.name,
-        description: req.body.description,
-        latitude: req.body.latitude,
-        longitude: req.body.longitude,
-        price: req.body.price,
-        images: req.body.images,
+// Get single camping
+campingController.getCamping = (req, res, next) => {
+  const id = req.params.id;
+  Camping.findById(id)
+    .then(camping => !camping
+        ? res.status(200).json({ camping })
+        : res.status(404).json({ message: "Camping not found" })
+    ).catch(error => res.status(500).json({ error }) );
+};
+
+// Create new camping
+campingController.createCamping = (req, res, next) => {
+  delete req.body._id;
+  delete req.body.owner;
+  const camping = new Camping({ ...req.body, owner: user._id });
+  camping.save().then(result => {
+      res.status(201).json({
+        message: "Camping created successfully",
+        camping: result
+      });
+    })
+    .catch(error => {
+      res.status(500).json({ error });
     });
-    await camping.save();
-    res.json({ status: "Camping created" });
 };
 
-campingCtrl.getCamping = async (req, res, next) => {
-    const { id } = req.params;    
-    const camping = await Camping.findById(id);
-    res.json(camping);
+// Update camping
+campingController.updateCamping = (req, res, next) => {
+  const id = req.params.id;
+  const updateOps = {};
+  for (const ops of req.body) {
+    updateOps[ops.propName] = ops.value;
+  }
+  Camping.updateOne({ _id: id }, { $set: updateOps })
+    .exec()
+    .then(result => {
+      res.status(200).json({
+        message: "Camping updated",
+        result: result
+      });
+    })
+    .catch(error => {
+      res.status(500).json({
+        error: error
+      });
+    });
 };
 
-campingCtrl.editCamping = async (req, res, next) => {
-    await Camping.findByIdAndUpdate(req.params.id, {$set: req.body}, {new: true});
-    res.json({ status: "Camping Updated" });
+// Delete a Camping
+campingController.deleteCamping = async (req, res, next) => {
+  try {
+    const camping = await Camping.findByIdAndDelete(req.params.campingId);
+    if (!camping) {
+      return res.status(404).json({ message: 'Camping not found' });
+    }
+    return res.status(200).json({ message: 'Camping deleted successfully' });
+  } catch (error) {
+    return res.status(500).json({ error });
+  }
 };
 
-
-campingCtrl.deleteCamping = async (req, res, next) => {
-    await Camping.findByIdAndRemove(req.params.id);
-    res.json({ status: "Camping Deleted" });
-};
-
-
-
-module.exports = campingCtrl;
+module.exports = campingController;

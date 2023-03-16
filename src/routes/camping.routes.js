@@ -7,7 +7,7 @@ const campingCtrl = require("../controllers/camping.controller");
 router.get("/", campingCtrl.getCampings);
 router.post("/", campingCtrl.createCamping);
 router.get("/:id", campingCtrl.getCamping);
-router.put("/:id", campingCtrl.editCamping);
+router.put("/:id", campingCtrl.updateCamping);
 router.delete("/:id", campingCtrl.deleteCamping);
 
 module.exports = router;

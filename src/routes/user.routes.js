@@ -5,7 +5,7 @@ const userCtrl = require("../controllers/user.controller");
 
 // CRUD de Usuarios
 router.get("/", userCtrl.getUsers);
-router.post("/create-user", userCtrl.createUser);
+router.post("/", userCtrl.createUser);
 router.get("/:id", userCtrl.getUser);
 router.put("/:id", userCtrl.editUser);
 router.delete("/:id", userCtrl.deleteUser);
