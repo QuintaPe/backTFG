@@ -1,11 +1,12 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const handleValidationError = require("../errors/handleValidationError");
 const jwtSecret = process.env.JWT_SECRET || "PalabraSecreta";
 const User = require("../models/user");
 
-const loginCtrl = {};
+const authCtrl = {};
 
-loginCtrl.login = async (req, res) => {
+authCtrl.login = async (req, res) => {
   const { email, password } = req.body;
   await User.findOne({ email }).then((user, err) => {
     if (err) {
@@ -28,4 +29,19 @@ loginCtrl.login = async (req, res) => {
   });
 };
 
-module.exports = loginCtrl;
+authCtrl.signup = async (req, res, next) => {
+  delete req.body._id;
+  console.log(req.body);
+  
+  const newUser = new User({ ...req.body, password: bcrypt.hashSync(req.body.password, 10)});
+  console.log(newUser);
+  newUser.save()
+    .then(user => res.status(201).json({ success: true, user }))
+    .catch(err => {
+      if (err.name === 'ValidationError') {
+        return handleValidationError(err, req, res, next);
+      }
+    });
+};
+
+module.exports = authCtrl;

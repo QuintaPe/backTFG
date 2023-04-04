@@ -24,7 +24,8 @@ app.use(express.json());
 // Routes
 app.use('/api/v1/users', authMiddleware, require('./routes/user.routes'));
 app.use('/api/v1/campings', authMiddleware, require('./routes/camping.routes'));
-app.use('/api/v1/', require('./routes/login.routes'));
+app.use('/api/v1/documents', require('./routes/document.routes'));
+app.use('/api/v1/', require('./routes/auth.routes'));
 
 
 

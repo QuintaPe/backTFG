@@ -8,6 +8,7 @@ UserSchema.add({
   role: { type: String, required: true, enum: ['admin', 'manager', 'user'] },
   lang: { type: String, required: true },
   attributes: { 
+    avatar: { type: Object },
     firstname: { type: String, required: function() { return this.role === "user"; } },
     lastname: { type: String, required: function() { return this.role === "user"; } },
     birthDate: { type: Date, required: function() { return this.role === "user"; } },

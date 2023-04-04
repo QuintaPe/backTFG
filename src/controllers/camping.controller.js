@@ -1,6 +1,5 @@
 const Joi = require('joi');
 const Camping = require('../models/camping');
-const { checkToken, validator } = require('../utils/functions');
 const campingController = {}
 
 
@@ -43,7 +42,7 @@ campingController.getCamping = (req, res, next) => {
 campingController.createCamping = (req, res, next) => {
   delete req.body._id;
   delete req.body.owner;
-  const camping = new Camping({ ...req.body, owner: user._id });
+  const camping = new Camping({ ...req.body, owner: req.user._id });
   camping.save().then(result => {
       res.status(201).json({
         message: "Camping created successfully",
