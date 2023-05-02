@@ -31,10 +31,8 @@ authCtrl.login = async (req, res) => {
 
 authCtrl.signup = async (req, res, next) => {
   delete req.body._id;
-  console.log(req.body);
   
   const newUser = new User({ ...req.body, password: bcrypt.hashSync(req.body.password, 10)});
-  console.log(newUser);
   newUser.save()
     .then(user => res.status(201).json({ success: true, user }))
     .catch(err => {

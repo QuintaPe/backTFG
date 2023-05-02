@@ -1,23 +1,14 @@
-const Joi = require('joi');
-const Camping = require('../models/camping');
-const campingController = {}
+const Unauthorized = require('../errors/Unauthorized');
+const mongoose = require('mongoose');
 
+const Camping = require('../models/camping');
+const CampingLodging = require('../models/campingLodging');
+const CampingUnit = require('../models/campingUnit');
+
+const campingController = {}
 
 // Get all campings
 campingController.getCampings = async (req, res, next) => {
-  const { error } = Joi.object({
-    page: Joi.number().integer().min(0).required(),
-    size: Joi.number().integer().min(0).required(),
-    search: Joi.string().optional().allow(null, ''),
-    filters: Joi.object().required(),
-    sort: Joi.string().optional().allow(null, ''),
-  }).validate(req.body);
-  
-  if (error) {
-    res.status(400).json({ error: error.details[0].message });
-    return -1;
-  }
-
   const { page, size, search, filters, sort } = req.body;
 
   if (req.user.role !== 'admin') {
@@ -29,63 +20,61 @@ campingController.getCampings = async (req, res, next) => {
 };
 
 // Get single camping
-campingController.getCamping = (req, res, next) => {
+campingController.getCamping = async (req, res, next) => {
   const id = req.params.id;
-  Camping.findById(id)
-    .then(camping => !camping
-        ? res.status(200).json({ camping })
-        : res.status(404).json({ message: "Camping not found" })
-    ).catch(error => res.status(500).json({ error }) );
-};
-
-// Create new camping
-campingController.createCamping = (req, res, next) => {
-  delete req.body._id;
-  delete req.body.owner;
-  const camping = new Camping({ ...req.body, owner: req.user._id });
-  camping.save().then(result => {
-      res.status(201).json({
-        message: "Camping created successfully",
-        camping: result
-      });
-    })
-    .catch(error => {
-      res.status(500).json({ error });
+  try {
+    const camping = await Camping.findById(id).populate('images').lean();
+    if(!camping) {
+      return res.status(404).json({ message: "Camping not found" });
+    }
+    const lodgings = await CampingLodging.find({ camping: camping._id });
+    const lodgingsWithUnits = lodgings.map(async lodging => {
+      lodging.units = await CampingUnit.find({ lodging: lodging._id });
+      return lodging;
     });
-};
-
-// Update camping
-campingController.updateCamping = (req, res, next) => {
-  const id = req.params.id;
-  const updateOps = {};
-  for (const ops of req.body) {
-    updateOps[ops.propName] = ops.value;
+    camping.lodgings = await Promise.all(lodgingsWithUnits)
+    res.status(200).json(camping);
+  } catch (error) {
+    res.status(500).json({ error })
   }
-  Camping.updateOne({ _id: id }, { $set: updateOps })
-    .exec()
-    .then(result => {
-      res.status(200).json({
-        message: "Camping updated",
-        result: result
-      });
-    })
-    .catch(error => {
-      res.status(500).json({
-        error: error
-      });
-    });
+};
+
+// Create or update a camping
+campingController.createCamping = async (req, res, next) => {
+  const session = await mongoose.startSession();
+  try {
+    delete req.body.owner;
+    session.startTransaction();
+
+    const camping = await Camping.createOrUpdate(req.body, req.user._id, session);
+    await CampingLodging.createOrUpdate(camping._id, req.body.lodgings, session);
+    await session.commitTransaction();
+    
+    res.status(201).json({ camping });
+  } catch (error) {
+    console.log(error);
+    await session.abortTransaction();
+    return next(error);
+  }
+  session.endSession();
 };
 
 // Delete a Camping
 campingController.deleteCamping = async (req, res, next) => {
   try {
-    const camping = await Camping.findByIdAndDelete(req.params.campingId);
+    const camping = await Camping.findByIdAndDelete(req.params.id).lean();
     if (!camping) {
       return res.status(404).json({ message: 'Camping not found' });
     }
+    
+    await Promise.all([
+      CampingUnit.deleteMany({ lodging: { $in: await CampingLodging.find({ camping: camping._id }) } }),
+      CampingLodging.deleteMany({ camping: camping._id })
+    ]);
+    
     return res.status(200).json({ message: 'Camping deleted successfully' });
   } catch (error) {
-    return res.status(500).json({ error });
+    return next(error);
   }
 };
 

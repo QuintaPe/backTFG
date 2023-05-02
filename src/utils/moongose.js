@@ -11,8 +11,11 @@ async function search(model, fields = null, query = {}, size = 10, page = 0, sor
       fieldsObj = fields.reduce((obj, field) => ({ ...obj, [field]: 1 }), {});
     }
   
-    const results = await model.find(query, fieldsObj, options);     
+    let results = await model.find(query, fieldsObj, options);     
     const total = await model.countDocuments(query);
+    if (fields?.length === 1) {
+      results = results.map(item => item[fields[0]]);
+    }
   
     return { items: results, total: total};
 };

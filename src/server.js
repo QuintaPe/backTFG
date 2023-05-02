@@ -1,7 +1,7 @@
 const express = require("express");
 const morgan = require("morgan");
 const cors = require("cors");
-const { authMiddleware } = require("./utils/middlewares");
+const { authMiddleware, errorsMiddleware } = require("./utils/middlewares");
 require('./database');
 
 // Initializations
@@ -28,8 +28,8 @@ app.use('/api/v1/documents', require('./routes/document.routes'));
 app.use('/api/v1/', require('./routes/auth.routes'));
 
 
-
-// Static files
+// Error Middleware
+app.use(errorsMiddleware);
 
 
 

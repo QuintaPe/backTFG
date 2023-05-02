@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const { model, models } = require("mongoose");
 
 const databaseSchema = require('./database');
 const UserSchema = databaseSchema.clone();
@@ -20,8 +20,8 @@ UserSchema.add({
 });
 
 UserSchema.path('email').validate(async (email) => {
-  const countEmails = await mongoose.models.User.countDocuments({ email });
+  const countEmails = await models.User.countDocuments({ email });
   return !countEmails;
 }, 'Email already exists');
 
-module.exports = mongoose.model('User', UserSchema);
+module.exports = model('User', UserSchema);

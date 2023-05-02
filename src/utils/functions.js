@@ -1,5 +1,3 @@
-const Joi = require('joi');
-
 function transformQuery(obj) {
   const transformedObj = {};
   const entries = Object.entries(obj);
