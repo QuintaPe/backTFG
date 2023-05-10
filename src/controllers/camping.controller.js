@@ -1,9 +1,9 @@
-const Unauthorized = require('../errors/Unauthorized');
 const mongoose = require('mongoose');
 
 const Camping = require('../models/camping');
 const CampingLodging = require('../models/campingLodging');
 const CampingUnit = require('../models/campingUnit');
+const NotFound = require('../errors/NotFound');
 
 const campingController = {}
 
@@ -11,16 +11,31 @@ const campingController = {}
 campingController.getCampings = async (req, res, next) => {
   const { page, size, search, filters, sort } = req.body;
 
+  const auxFilters = {}
   if (req.user.role !== 'admin') {
-    filters.owner = req.user._id;
+    auxFilters.owner = req.user._id;
   }
 
-  const response = await Camping.search(null, filters, size, page, sort ?? '-createdAt');
+  const response = await Camping.search(null, auxFilters, size, page, sort ?? '-createdAt');
   res.json(response);
 };
 
 // Get single camping
 campingController.getCamping = async (req, res, next) => {
+  const id = req.params.id;
+  try {
+    const camping = await Camping.findById(id).populate('images').lean();
+    if(!camping) {
+      throw NotFound(id, 'Camping');
+    }
+    res.status(200).json(camping);
+  } catch (error) {
+    res.status(500).json({ error })
+  }
+};
+
+// Get single camping with his lodgings and their units
+campingController.getFullCamping = async (req, res, next) => {
   const id = req.params.id;
   try {
     const camping = await Camping.findById(id).populate('images').lean();
@@ -52,7 +67,6 @@ campingController.createCamping = async (req, res, next) => {
     
     res.status(201).json({ camping });
   } catch (error) {
-    console.log(error);
     await session.abortTransaction();
     return next(error);
   }

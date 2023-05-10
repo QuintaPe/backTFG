@@ -1,52 +1,49 @@
-const Booking = require('path/to/booking.model');
+const Booking = require('../models/booking');
+const campingLodging = require('../models/campingLodging');
+const Unauthorized = require('../errors/Unauthorized');
+const { arrayToObj, daysBetweenDates } = require('../utils/functions');
+const campingUnit = require('../models/campingUnit');
+
 const bookingController = {};
 
-bookingController.createBooking = async (req, res) => {
+bookingController.createBooking = async (req, res, next) => {
+  const { id } = req.params;
+  const { startDate, endDate, lodgings, user, paymentMethod } = req.body;
   try {
-    const booking = new Booking(req.body);
+    const booking = new Booking({ camping: id, startDate, endDate, paymentMethod, user: req.user._id });
+    const totalDays = daysBetweenDates(endDate, startDate);
+    let totalCost = 0;
+    let units = [];
+    
+    let availableLodgings = await campingLodging.getAvailableLodgings(id, startDate, endDate);
+    availableLodgings = arrayToObj(availableLodgings.items);
+    for (const lodging of Object.keys(lodgings)) {
+      if (!availableLodgings[lodging] || availableLodgings[lodging].availables < lodgings[lodging] ) {
+        throw new Unauthorized();
+      }
+      units.push(campingUnit.getAvailableUnits(id, [lodging], startDate, endDate, 0, lodgings[lodging], ['_id']));
+      totalCost += totalDays * availableLodgings[lodging].feePerNight * lodgings[lodging]
+      
+    };
+    units = await Promise.all(units);
+    booking.units = units.flatMap(unit => unit.items);
+    booking.totalCost = totalCost;
     await booking.save();
-    res.status(201).json({ message: 'Booking created successfully', booking });
+    res.status(201).json(booking);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    next(error);
   }
 };
 
-bookingController.getAllBookings = async (req, res) => {
-  try {
-    const bookings = await Booking.find().populate('campingId', 'name').populate('userId', 'username');
-    res.status(200).json({ bookings });
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-};
 
-bookingController.getBookingById = async (req, res) => {
-  try {
-    const booking = await Booking.findById(req.params.id).populate('campingId', 'name').populate('userId', 'username');
-    if (!booking) return res.status(404).json({ message: 'Booking not found' });
-    res.status(200).json({ booking });
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-};
+bookingController.getCampingBookings = async (req, res, next) => {
+  const { camping, startDate, endDate } = req.body;
 
-bookingController.updateBooking = async (req, res) => {
   try {
-    const booking = await Booking.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    if (!booking) return res.status(404).json({ message: 'Booking not found' });
-    res.status(200).json({ message: 'Booking updated successfully', booking });
+    const bookings = await Booking.getCampingBookings(camping, startDate, endDate);
+    res.status(201).json({ bookings });
   } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-};
-
-bookingController.deleteBooking = async (req, res) => {
-  try {
-    const booking = await Booking.findByIdAndDelete(req.params.id);
-    if (!booking) return res.status(404).json({ message: 'Booking not found' });
-    res.status(200).json({ message: 'Booking deleted successfully' });
-  } catch (error) {
-    res.status(400).json({ message: error.message });
+    next(error);
   }
 };
 

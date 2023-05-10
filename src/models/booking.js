@@ -1,16 +1,27 @@
-const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
+const { Schema, model } = require('mongoose');
+const databaseSchema = require('./database');
 
-const BookingSchema = new Schema({
+const BookingSchema = databaseSchema.clone();
+
+BookingSchema.add({
   camping: { type: Schema.Types.ObjectId, ref: 'Camping', required: true },
   user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   startDate: { type: Date, required: true },
   endDate: { type: Date, required: true },
-  guests: { type: Number, required: true },
+  units: { type: [Schema.Types.ObjectId], ref: 'CampingUnit', required: true },
   totalCost: { type: Number, required: true },
   paymentMethod: { type: String, required: true },
-  createdAt: { type: Date, default: Date.now },
-  modifiedAt: { type: Date, default: Date.now },
-},{timestamps: true});
+});
 
-module.exports = mongoose.model('Booking', BookingSchema);
+BookingSchema.statics.getCampingBookings = async function (camping, startDate, endDate) {
+  const Booking = this;  
+  const filters = {
+    camping,
+    startDate: { $gte: startDate },
+    endDate: { $lte: endDate }
+  }
+
+  return Booking.search(null, filters, 0);
+}
+
+module.exports = model('Booking', BookingSchema);

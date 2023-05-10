@@ -1,6 +1,5 @@
 const User = require("../models/user");
 const bcrypt = require("bcrypt");
-const handleValidationError = require('../errors/handleValidationError')
 
 const userCtrl = {};
 

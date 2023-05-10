@@ -1,6 +1,5 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const handleValidationError = require("../errors/handleValidationError");
 const jwtSecret = process.env.JWT_SECRET || "PalabraSecreta";
 const User = require("../models/user");
 
@@ -35,11 +34,7 @@ authCtrl.signup = async (req, res, next) => {
   const newUser = new User({ ...req.body, password: bcrypt.hashSync(req.body.password, 10)});
   newUser.save()
     .then(user => res.status(201).json({ success: true, user }))
-    .catch(err => {
-      if (err.name === 'ValidationError') {
-        return handleValidationError(err, req, res, next);
-      }
-    });
+    .catch(err => next(err));
 };
 
 module.exports = authCtrl;

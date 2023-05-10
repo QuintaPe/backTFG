@@ -12,22 +12,21 @@ const authMiddleware = (req, res, next) => {
     req.user = decode.user;
     
     if (req.method === 'GET') {
-        req.body = transformQuery(req.query);
+        req.query = transformQuery(req.query);
     }
     next();
 }
 
 const errorsMiddleware = (err, req, res, next) => {
-    if (err?.code == 11000) {
-        return res.status(500).json({err});
-    }
     if (err?.name == 'ValidationError') {
-        return res.status(500).json(err);
+        const errors = Object.values(err.errors).map(val => ({ path: val.path, message: val.message }));
+        return res.status(422).json(errors);
     }
-    if (err.name == 'Unauthorized') {
-        return res.status(401).json({err});
+    if (err.statusCode && err.statusCode < 600) {
+        return res.status(err.statusCode).json({err});
     }
-    return res.status(500).json({ error: 'Internal Server Error' });
+    console.log(err);
+    return res.status(500).json({ message: 'Internal Server Error', err });
 }
 
 module.exports = {

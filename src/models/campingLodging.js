@@ -1,8 +1,8 @@
 const { Schema, model } = require('mongoose');
 const databaseSchema = require('./database');
+const campingLodgingSchema = databaseSchema.clone();
 const CampingUnit = require('./campingUnit');
 const Unauthorized = require('../errors/Unauthorized');
-const campingLodgingSchema = databaseSchema.clone();
 
 campingLodgingSchema.add({
   camping: { type: Schema.Types.ObjectId, ref: 'Camping' },
@@ -25,6 +25,7 @@ campingLodgingSchema.add({
 });
 
 campingLodgingSchema.virtual('units');
+campingLodgingSchema.virtual('availables');
 
 campingLodgingSchema.statics.createOrUpdate = async function (camping, lodgings, session) {
   const CampingLodging = this;
@@ -66,6 +67,29 @@ campingLodgingSchema.statics.createOrUpdate = async function (camping, lodgings,
       { lodging: { $in: await CampingLodging.find({ _id: { $nin: CampingLodgingIds }, camping }, '_id') }},
       { session }
     );
+  }
+}
+
+campingLodgingSchema.statics.getAvailableLodgings = async function (camping, startDate, endDate) {
+const CampingLodging = this;
+  try {
+    const lodgings = await CampingLodging.search(['_id'], { camping });
+    const availableUnits = await CampingUnit.getAvailableUnits(camping, lodgings.items, startDate, endDate);
+    const campingLodgingAvailables = {}
+    availableUnits.items.forEach(element => {
+      campingLodgingAvailables[element.lodging] = campingLodgingAvailables[element.lodging] 
+        ? campingLodgingAvailables[element.lodging] + 1 : 1
+    });
+    const campingLodgings = await CampingLodging.search(null, { _id: { $in: Object.keys(campingLodgingAvailables) } });
+    campingLodgings.items = campingLodgings.items.map(lodging => {
+      lodging.availables = campingLodgingAvailables[lodging._id];
+      return lodging;
+    })
+    console.log(availableUnits)
+
+    return campingLodgings;
+  } catch (err) {
+    throw err;
   }
 }
 
