@@ -70,22 +70,25 @@ campingLodgingSchema.statics.createOrUpdate = async function (camping, lodgings,
   }
 }
 
-campingLodgingSchema.statics.getAvailableLodgings = async function (camping, startDate, endDate) {
-const CampingLodging = this;
+campingLodgingSchema.statics.getAvailableLodgings = async function (camping, entryDate, exitDate, opts) {
+  const CampingLodging = this;
+  const { page = 0, size = 0, filters = {}, sort = '' } = opts;
+
   try {
     const lodgings = await CampingLodging.search(['_id'], { camping });
-    const availableUnits = await CampingUnit.getAvailableUnits(camping, lodgings.items, startDate, endDate);
+    const availableUnits = await CampingUnit.getAvailableUnits(camping, lodgings.items, entryDate, exitDate, {});
     const campingLodgingAvailables = {}
     availableUnits.items.forEach(element => {
       campingLodgingAvailables[element.lodging] = campingLodgingAvailables[element.lodging] 
         ? campingLodgingAvailables[element.lodging] + 1 : 1
     });
-    const campingLodgings = await CampingLodging.search(null, { _id: { $in: Object.keys(campingLodgingAvailables) } });
+
+    const searchFilters = { ...filters, _id: { $in: Object.keys(campingLodgingAvailables) } };
+    const campingLodgings = await CampingLodging.search(null, searchFilters, size, page, sort);
     campingLodgings.items = campingLodgings.items.map(lodging => {
       lodging.availables = campingLodgingAvailables[lodging._id];
       return lodging;
     })
-    console.log(availableUnits)
 
     return campingLodgings;
   } catch (err) {

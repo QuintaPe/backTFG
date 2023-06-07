@@ -23,9 +23,10 @@ campingLodgingController.getCampingLodgings = async (req, res, next) => {
 campingLodgingController.getAvailableLodgings = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { startDate, endDate } = req.query;
+    const { entryDate, exitDate, page, size, search, filters, sort } = req.query;
+    const opts = { page, size, search, filters, sort };
 
-    const availableLodgings = await CampingLodging.getAvailableLodgings(id, startDate, endDate);
+    const availableLodgings = await CampingLodging.getAvailableLodgings(id, entryDate, exitDate, opts);
     res.status(201).json(availableLodgings);
   } catch (err) {
     next(err);

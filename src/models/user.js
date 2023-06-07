@@ -9,13 +9,10 @@ UserSchema.add({
   lang: { type: String, required: true },
   attributes: { 
     avatar: { type: Object },
-    firstname: { type: String, required: function() { return this.role === "user"; } },
-    lastname: { type: String, required: function() { return this.role === "user"; } },
-    birthDate: { type: Date, required: function() { return this.role === "user"; } },
-    phone: { type: String, required: function() { return this.role === "user"; } },
-
-    // Manager
-    camping: { type: String },
+    firstname: { type: String, required: true },
+    lastname: { type: String, required: true },
+    birthDate: { type: Date, required: true },
+    phone: { type: String, required: true },
   },
 });
 

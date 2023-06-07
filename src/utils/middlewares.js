@@ -1,5 +1,4 @@
 const jwt = require("jsonwebtoken");
-const { transformQuery } = require("./functions");
 const jwtSecret = process.env.JWT_SECRET || "PalabraSecreta";
 
 const authMiddleware = (req, res, next) => {
@@ -12,7 +11,15 @@ const authMiddleware = (req, res, next) => {
     req.user = decode.user;
     
     if (req.method === 'GET') {
-        req.query = transformQuery(req.query);
+        req.query = Object.fromEntries(
+            Object.entries(req.query).map(([key, val]) => {
+                try {
+                    return [key, JSON.parse(val)]
+                } catch {
+                    return [key, val]
+                }
+            })
+        );
     }
     next();
 }

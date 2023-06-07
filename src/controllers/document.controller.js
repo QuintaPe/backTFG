@@ -58,6 +58,7 @@ documentController.downloadDocument = async (req, res, next) => {
     file.createReadStream().pipe(res);
 
   } catch (error) {
+    console.log(error)
     res.status(500).send('Error');
   }
 };

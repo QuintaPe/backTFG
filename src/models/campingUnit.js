@@ -55,20 +55,20 @@ campingUnitSchema.statics.getCampingUnits = async function (camping) {
   return await CampingUnit.search(null, { lodging: lodgings });
 }
 
-campingUnitSchema.statics.getCampingUnitBooked = async function (camping, startDate, endDate) {
-  const bookings = await Booking.getCampingBookings(camping, startDate, endDate);
-  return bookings.items.reduce((prev, curr) => [...prev, ...curr.units], []);
+campingUnitSchema.statics.getCampingUnitBooked = async function (camping, entryDate, exitDate) {
+  const bookings = await Booking.getCampingBookings(camping, entryDate, exitDate, { fields: ['units'] })
+  return bookings.items.reduce((prev, curr) => [...prev, ...curr], []);
 }
 
-campingUnitSchema.statics.getAvailableUnits = async function (camping, lodgings, startDate, endDate, page=0, size=0, fields=null) {
+campingUnitSchema.statics.getAvailableUnits = async function (camping, lodgings, entryDate, exitDate, opts) {
   const CampingUnit = this;
+  const { fields = null, page = 0, size = 0, filters = {}, sort = '' } = opts;
   
-  const unitsBooked = await CampingUnit.getCampingUnitBooked(camping, startDate, endDate);
+  const unitsBooked = await CampingUnit.getCampingUnitBooked(camping, entryDate, exitDate);
 
   const availableUnits = await CampingUnit.search(fields, { 
-    _id: { $nin: unitsBooked },
-    lodging: lodgings,
-  }, size, page);
+    _id: { $nin: unitsBooked }, lodging: lodgings,
+  }, size, page, filters, sort);
   return availableUnits;
 }
 

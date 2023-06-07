@@ -1,27 +1,29 @@
 const Booking = require('../models/booking');
-const campingLodging = require('../models/campingLodging');
+const Camping = require('../models/camping');
+const CampingUnit = require('../models/campingUnit');
+const CampingLodging = require('../models/campingLodging');
 const Unauthorized = require('../errors/Unauthorized');
 const { arrayToObj, daysBetweenDates } = require('../utils/functions');
-const campingUnit = require('../models/campingUnit');
 
 const bookingController = {};
 
 bookingController.createBooking = async (req, res, next) => {
   const { id } = req.params;
-  const { startDate, endDate, lodgings, user, paymentMethod } = req.body;
+  const { entryDate, exitDate, lodgings, manager, paymentMethod } = req.body;
   try {
-    const booking = new Booking({ camping: id, startDate, endDate, paymentMethod, user: req.user._id });
-    const totalDays = daysBetweenDates(endDate, startDate);
+    const booking = new Booking({ camping: id, entryDate, exitDate, manager, paymentMethod, user: req.user._id });
+    const totalDays = daysBetweenDates(exitDate, entryDate);
     let totalCost = 0;
     let units = [];
     
-    let availableLodgings = await campingLodging.getAvailableLodgings(id, startDate, endDate);
+    let availableLodgings = await CampingLodging.getAvailableLodgings(id, entryDate, exitDate, {});
     availableLodgings = arrayToObj(availableLodgings.items);
     for (const lodging of Object.keys(lodgings)) {
       if (!availableLodgings[lodging] || availableLodgings[lodging].availables < lodgings[lodging] ) {
         throw new Unauthorized();
       }
-      units.push(campingUnit.getAvailableUnits(id, [lodging], startDate, endDate, 0, lodgings[lodging], ['_id']));
+      units.push(CampingUnit.getAvailableUnits(id, [lodging], entryDate, exitDate, { 
+        size: lodgings[lodging], fields: ['_id'] }));
       totalCost += totalDays * availableLodgings[lodging].feePerNight * lodgings[lodging]
       
     };
@@ -37,11 +39,36 @@ bookingController.createBooking = async (req, res, next) => {
 
 
 bookingController.getCampingBookings = async (req, res, next) => {
-  const { camping, startDate, endDate } = req.body;
+  const { id } = req.params;
+  const { page, size, search, filters, sort } = req.query;
+  const opts = { page, size, search, filters, sort, populate: [
+    { path: 'user', select: 'attributes.firstname attributes.lastname' },
+    { path: 'units', select: 'name' },
+  ] };
 
   try {
-    const bookings = await Booking.getCampingBookings(camping, startDate, endDate);
-    res.status(201).json({ bookings });
+    const camping = await Camping.findById(id);
+    if (!camping || !camping.owner.equals(req.user._id)) {
+      throw new Unauthorized();
+    }
+    const bookings = await Booking.getCampingBookings(id, null, null, opts);
+    res.status(201).json(bookings);
+  } catch (error) {
+    next(error);
+  }
+};
+
+bookingController.deleteCampingBooking = async (req, res, next) => {
+  const { id, booking } = req.params;
+  try {
+    const bookingToRemove = await Booking.findOne({ _id: booking, camping: id }).populate('camping');
+
+    if (!bookingToRemove || !bookingToRemove.camping.owner.equals(req.user._id)) {
+      throw new Unauthorized();
+    }
+
+    await Booking.findByIdAndRemove(booking);
+    res.status(200).json({ deleted: booking });
   } catch (error) {
     next(error);
   }

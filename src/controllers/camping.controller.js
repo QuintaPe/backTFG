@@ -11,12 +11,12 @@ const campingController = {}
 campingController.getCampings = async (req, res, next) => {
   const { page, size, search, filters, sort } = req.body;
 
-  const auxFilters = {}
+  const auxFilters = { ...filters }
   if (req.user.role !== 'admin') {
     auxFilters.owner = req.user._id;
   }
 
-  const response = await Camping.search(null, auxFilters, size, page, sort ?? '-createdAt');
+  const response = await Camping.search(null, auxFilters, size, page, sort);
   res.json(response);
 };
 
