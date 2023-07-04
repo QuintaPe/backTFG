@@ -58,6 +58,26 @@ bookingController.getCampingBookings = async (req, res, next) => {
   }
 };
 
+bookingController.getUserBookings = async (req, res, next) => {
+  const { id } = req.params;
+  const opts = req.query.opts;
+  opts.populate = [
+    { path: 'user', select: 'attributes.firstname attributes.lastname' },
+    { path: 'units', select: 'name' },
+  ];
+
+  try {
+    if (id !== req.user._id) {
+      throw new Unauthorized();
+    }
+
+    const bookings = await Booking.getUserBookings(req.user.role === 'admin' ? null : id, opts);
+    res.status(201).json(bookings);
+  } catch (error) {
+    next(error);
+  }
+};
+
 bookingController.deleteCampingBooking = async (req, res, next) => {
   const { id, booking } = req.params;
   try {

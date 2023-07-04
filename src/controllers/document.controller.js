@@ -1,19 +1,21 @@
 const Document = require('../models/document');
-const { Storage } = require('@google-cloud/storage')
+const { Storage } = require('@google-cloud/storage');
 const documentController = {};
 
 const storage = new Storage({
   projectId: 'hale-equator-382816',
   keyFilename: 'googleCloudKey.json',
-})
+});
 
 const bucket = storage.bucket('scoutcamp-bucket');
 
 // Create document
 documentController.createDocument = async (req, res, next) => {
-  if (req.file) {          
+  if (req.file) {
     try {
-      const path = `${req.body.public ? 'public/' : ''}${Date.now()}-${req.file.originalname}`
+      const path = `${req.body.public ? 'public/' : ''}${Date.now()}-${
+        req.file.originalname
+      }`;
       const blob = bucket.file(path);
       const blobStream = blob.createWriteStream();
 
@@ -25,27 +27,26 @@ documentController.createDocument = async (req, res, next) => {
           type: req.file.mimetype,
           size: req.file.size,
           path,
-          owner: req.user._id 
+          owner: req.user._id,
         });
-      
+
         const response = await document.save();
         res.json(response);
-      })
+      });
 
       blobStream.end(req.file.buffer);
-      
-    } catch (error){
-        throw new Error(error);
+    } catch (error) {
+      next(error);
     }
   }
 };
 
 documentController.downloadDocument = async (req, res, next) => {
   try {
-    const document = await Document.findById(req.params.id);  
+    const document = await Document.findById(req.params.id);
     const file = bucket.file(document.path);
     const exists = await file.exists();
-    
+
     if (!exists[0]) {
       throw new Error('El archivo no existe.');
     }
@@ -56,10 +57,8 @@ documentController.downloadDocument = async (req, res, next) => {
 
     res.set('Content-Type', document.type);
     file.createReadStream().pipe(res);
-
   } catch (error) {
-    console.log(error)
-    res.status(500).send('Error');
+    next(error);
   }
 };
 

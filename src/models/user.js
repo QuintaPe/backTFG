@@ -1,4 +1,4 @@
-const { model, models } = require("mongoose");
+const { model, models } = require('mongoose');
 
 const databaseSchema = require('./database');
 const UserSchema = databaseSchema.clone();
@@ -7,7 +7,7 @@ UserSchema.add({
   password: { type: String, required: true },
   role: { type: String, required: true, enum: ['admin', 'manager', 'user'] },
   lang: { type: String, required: true },
-  attributes: { 
+  attributes: {
     avatar: { type: Object },
     firstname: { type: String, required: true },
     lastname: { type: String, required: true },

@@ -3,11 +3,11 @@ const databaseSchema = require('./database');
 
 const BookingSchema = databaseSchema.clone();
 
-const manager = { 
+const manager = {
   firstname: { type: String, required: true },
   lastname: { type: String, required: true },
   phone: { type: String, required: true },
-  email: { type: String, required: true },  
+  email: { type: String, required: true },
 };
 
 BookingSchema.add({
@@ -21,17 +21,39 @@ BookingSchema.add({
   paymentMethod: { type: String, required: true },
 });
 
-BookingSchema.statics.getCampingBookings = async function (camping, entryDate, exitDate, opts) {
+BookingSchema.statics.getCampingBookings = async function (
+  camping,
+  entryDate,
+  exitDate,
+  opts
+) {
   const Booking = this;
   const { page, size, filters, sort, fields, populate } = opts;
 
-  const searchFilters = { ...filters, camping } 
+  const searchFilters = { ...filters, camping };
   if (entryDate && exitDate) {
-    searchFilters.entryDate = { $gte: entryDate }
-    searchFilters.exitDate = { $lte: exitDate }
+    searchFilters.entryDate = { $gte: entryDate };
+    searchFilters.exitDate = { $lte: exitDate };
   }
 
-  return Booking.search(fields || null, searchFilters, size, page, sort, populate);
-}
+  return Booking.search(
+    fields || null,
+    searchFilters,
+    size,
+    page,
+    sort,
+    populate
+  );
+};
+
+BookingSchema.statics.getUserBookings = async function (user, opts) {
+  const Booking = this;
+  const { page, size, filters, sort, fields, populate } = opts;
+  if (user) {
+    filters.user = user;
+  }
+
+  return Booking.search(fields || null, filters, size, page, sort, populate);
+};
 
 module.exports = model('Booking', BookingSchema);

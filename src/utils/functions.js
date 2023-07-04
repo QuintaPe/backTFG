@@ -13,4 +13,4 @@ function daysBetweenDates(auxExitDate, auxEntryDate) {
 module.exports = {
   arrayToObj,
   daysBetweenDates,
-}
+};

@@ -1,29 +1,37 @@
-const express = require("express");
-const morgan = require("morgan");
-const cors = require("cors");
-const { authMiddleware, errorsMiddleware } = require("./utils/middlewares");
+const express = require('express');
+const morgan = require('morgan');
+const cors = require('cors');
+const {
+  formatQuery,
+  authMiddleware,
+  errorsMiddleware,
+  checkUser,
+} = require('./utils/middlewares');
 
 // Initializations
 const app = express();
 
 // Settings
-app.set("port", process.env.PORT || 3000);
-
+app.set('port', process.env.PORT || 3000);
 
 // Middlewares
-app.use(cors({
+app.use(
+  cors({
     origin: 'http://localhost:4200',
-    credentials: true
-}));
-app.use(morgan("dev"));
+    credentials: true,
+  })
+);
+app.use(morgan('dev'));
 app.use(express.json());
+app.use(formatQuery);
+app.use(checkUser);
 
 // Routes
 app.use('/api/v1/users', authMiddleware, require('./routes/user.routes'));
-app.use('/api/v1/campings', authMiddleware, require('./routes/camping.routes'));
+app.use('/api/v1/campings', authMiddleware, require('./routes/camping.routes').login);
+app.use('/api/v1/campings', require('./routes/camping.routes').guest);
 app.use('/api/v1/documents', require('./routes/document.routes'));
 app.use('/api/v1/', require('./routes/auth.routes'));
-
 
 // Error Middleware
 app.use(errorsMiddleware);
