@@ -26,26 +26,10 @@ campingController.getFavoriteCampings = async (req, res, next) => {
   const user = req.user._id;
 
   try {
-    const favoriteCampings = await CampingRelation.aggregate([
-      { $match: { user: mongoose.Types.ObjectId(user), favorite: true } },
-      {
-        $lookup: {
-          from: 'campings',
-          localField: 'camping',
-          foreignField: '_id',
-          as: 'relation',
-        },
-      },
-      { $skip: page * size },
-      { $limit: size },
-    ]);
-    
-    const response = favoriteCampings.map(camping => ({
-      ...camping.relation[0],
-      relation: camping,
-    }));
+    const campingIds = await CampingRelation.search(['camping'], { user, favorite: true }, size, page);
+    const campings = await Camping.getCampings(page, size, user, { campings: campingIds.items });
 
-    res.json({ items: response, total: response.length });
+    res.json(campings);
   } catch (error) {
     next(error);
   }
@@ -54,157 +38,10 @@ campingController.getFavoriteCampings = async (req, res, next) => {
 campingController.getAvailableCampings = async (req, res, next) => {
   const { lat, lng, entryDate, exitDate, capacity } = req.query;
   const { page = 0, size = 10000 } = req.query.opts;
+  const user = req.user?.id;
 
-  Camping.aggregate([
-    {
-      $geoNear: {
-        near: {
-          type: 'Point',
-          coordinates: [lat, lng],
-        },
-        distanceField: 'distance',
-        spherical: true,
-        maxDistance: 10000,
-        query: {},
-        includeLocs: 'location',
-        distanceMultiplier: 0.001,
-      },
-    },
-    {
-      $lookup: {
-        from: 'camping_lodgings',
-        localField: '_id',
-        foreignField: 'camping',
-        as: 'lodgings',
-      },
-    },
-    {
-      $lookup: {
-        from: 'camping_units',
-        localField: 'lodgings._id',
-        foreignField: 'lodging',
-        as: 'units',
-      },
-    },
-    {
-      $addFields: {
-        lodgings: {
-          $map: {
-            input: '$lodgings',
-            as: 'lodging',
-            in: {
-              $mergeObjects: [
-                '$$lodging',
-                {
-                  units: {
-                    $filter: {
-                      input: '$units',
-                      as: 'unit',
-                      cond: { $eq: ['$$unit.lodging', '$$lodging._id'] },
-                    },
-                  },
-                },
-              ],
-            },
-          },
-        },
-      },
-    },
-    {
-      $addFields: {
-        totalCapacity: {
-          $sum: {
-            $map: {
-              input: "$lodgings",
-              in: { $multiply: ["$$this.capacity", { $size: "$$this.units" }] }
-            }
-          }
-        }
-      }
-    },
-    {
-      $lookup: {
-        from: 'bookings',
-        let: { campingId: '$_id' },
-        pipeline: [
-          {
-            $match: {
-              $expr: {
-                $and: [
-                  { $eq: ['$camping', '$$campingId'] },
-                  { $lte: ['$entryDate', new Date(exitDate)] },
-                  { $gte: ['$exitDate', new Date(entryDate)] },
-                ],
-              },
-            },
-          },
-          {
-            $lookup: {
-              from: 'camping_units',
-              localField: 'units',
-              foreignField: '_id',
-              as: 'unitsInfo',
-            },
-          },
-          {
-            $unwind: {
-              path: '$unitsInfo',
-              preserveNullAndEmptyArrays: true,
-            },
-          },
-          {
-            $lookup: {
-              from: 'camping_lodgings',
-              localField: 'unitsInfo.lodging',
-              foreignField: '_id',
-              as: 'lodgingInfo',
-            },
-          },
-          {
-            $unwind: {
-              path: '$lodgingInfo',
-              preserveNullAndEmptyArrays: true,
-            },
-          },
-        ],
-        as: 'bookingInfo',
-      },
-    },
-    {
-      $addFields: {
-        availableCapacity: {
-          $subtract: [
-            '$totalCapacity',
-            { $sum: { $ifNull: ['$bookingInfo.lodgingInfo.capacity', 0] } },
-          ],
-        },
-      },
-    },
-    { $unset: [ "units", "bookingInfo"] },
-    { $skip: page * size },
-    { $limit: size },
-  ])
-    .then(async (campings) => {
-      if (req.user?._id) {  
-        const filters = {
-          camping: campings.map(camping => camping._id),
-          user: req.user._id,
-        }
-        let relations = await CampingRelation.search(null, filters);
-        relations = arrayToObj(relations.items, 'camping');
-        
-        campings = campings.map(camping => ({
-          ...camping, relation: relations[camping._id] || null,
-        }))
-      }
-      res.json({ items: campings, total: campings.length });
-    })
-    .catch((error) => {
-      next(error);
-    });
-
-  // const response = await Camping.search(null, auxFilters, size, page, sort);
-  // res.json(results);
+  const campings = await Camping.getCampings(page, size, user, { lat, lng, entryDate, exitDate, capacity })
+  res.json(campings);
 };
 
 // Get single camping

@@ -9,18 +9,19 @@ const checkUser = (req, res, next) => {
         try {
           const decode = jwt.verify(token, jwtSecret);
           req.user = decode.user;
-          next();
         } catch (err) {
           const error = new HandledError(err.name, err.message);
-          errorsMiddleware(error, req, res);
+          return errorsMiddleware(error, req, res);
         }
-    }
+    } 
     next();
 };
 
 const authMiddleware = (req, res, next) => {
     if (!req.user?._id) {
       res.status(401).send('Unauthorized');
+    } else {
+      next();
     }
 };
 
