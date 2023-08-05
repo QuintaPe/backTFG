@@ -1,8 +1,9 @@
 class HandledError extends Error {
-  constructor(codeName, message = '') {
-    super(message);
+  constructor(codeName, message = '', statusCode = 400) {
+    super();
     this.name = codeName;
-    this.statusCode = 400;
+    this.message = message;
+    this.statusCode = statusCode;
   }
 }
 

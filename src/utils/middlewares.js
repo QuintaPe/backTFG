@@ -41,18 +41,18 @@ const formatQuery = (req, res, next) => {
 };
 
 const errorsMiddleware = (err, req, res, next) => {
-  if (err?.name == 'ValidationError') {
-    const errors = Object.values(err.errors).map((val) => ({
-      path: val.path,
-      message: val.message,
-    }));
-    return res.status(422).json(errors);
+  let error = err;
+  console.log(error);
+  if (error?.name == 'ValidationError') {
+    const aux = Object.values(error.errors)[0];
+    console.log(aux);
+    const errorCode = aux.message.toLowerCase().replace(/ /g, '_');
+    error = new HandledError(errorCode, aux.message, 422);
+  } else if (!error.statusCode || error.statusCode >= 600) {
+    error = new HandledError('internal_server_error', 'Internal Server Error', 500);
   }
-  if (err.statusCode && err.statusCode < 600) {
-    return res.status(err.statusCode).json(err);
-  }
-  console.log(err);
-  return res.status(500).json({ message: 'Internal Server Error', err });
+
+  return res.status(error.statusCode).json(error);
 };
 
 module.exports = {

@@ -26,6 +26,9 @@ authCtrl.login = async (req, res, next) => {
 authCtrl.signup = async (req, res, next) => {
   delete req.body._id;
   try {
+    if (req.body.password !== req.body.confirmPassword) {
+      throw new HandledError('password_mismatch', 'Password mismatch');
+    }
     const newUser = new User({
       ...req.body,
       password: bcrypt.hashSync(req.body.password, 10),
