@@ -61,10 +61,7 @@ bookingController.getCampingBookings = async (req, res, next) => {
 bookingController.getUserBookings = async (req, res, next) => {
   const { id } = req.params;
   const opts = req.query.opts;
-  opts.populate = [
-    { path: 'user', select: 'attributes.firstname attributes.lastname' },
-    { path: 'units', select: 'name' },
-  ];
+  opts.populate = ['user', 'units', 'camping']
 
   try {
     if (id !== req.user._id) {
@@ -72,6 +69,7 @@ bookingController.getUserBookings = async (req, res, next) => {
     }
 
     const bookings = await Booking.getUserBookings(req.user.role === 'admin' ? null : id, opts);
+    
     res.status(201).json(bookings);
   } catch (error) {
     next(error);

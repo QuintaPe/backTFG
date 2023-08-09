@@ -1,7 +1,4 @@
-const Unauthorized = require('../errors/Unauthorized');
-const Camping = require('../models/camping');
 const CampingLodging = require('../models/campingLodging');
-
 const campingLodgingController = {};
 
 campingLodgingController.getCampingLodgings = async (req, res, next) => {

@@ -1,5 +1,7 @@
 const { Schema, model } = require('mongoose');
 const databaseSchema = require('./database');
+const CampingRelation = require('./campingRelation');
+const { arrayToObj } = require('../utils/functions');
 
 const BookingSchema = databaseSchema.clone();
 
@@ -53,7 +55,15 @@ BookingSchema.statics.getUserBookings = async function (user, opts) {
     filters.user = user;
   }
 
-  return Booking.search(fields || null, filters, size, page, sort, populate);
+  const bookings = await Booking.search(fields || null, filters, size, page, sort, populate, true);
+  const relationFilters = {
+    camping: bookings.items.map(book => book.camping._id),
+    user
+  };
+  let campingRelations = await CampingRelation.search(['camping', 'favorite', 'review'], relationFilters, 0);
+  campingRelations = arrayToObj(campingRelations.items, 'camping');
+  bookings.items = bookings.items.map(book => ({ ...book, relation: campingRelations[book.camping._id]}));
+  return bookings;
 };
 
 module.exports = model('Booking', BookingSchema);

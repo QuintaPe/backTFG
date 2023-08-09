@@ -11,7 +11,8 @@ databaseSchema.statics.search = async function (
   size = 0,
   page = 0,
   sort = '',
-  populate = ''
+  populate = '',
+  lean = false,
 ) {
   const options = {
     limit: +size === 0 ? 10000 : +size,
@@ -25,7 +26,14 @@ databaseSchema.statics.search = async function (
     fieldsObj = fields.reduce((obj, field) => ({ ...obj, [field]: 1 }), {});
   }
 
-  let results = await this.find(query, fieldsObj, options);
+  let results = this.find(query, fieldsObj, options);
+  
+  if (lean) {
+    results = results.lean();
+  }
+  
+  results = await results.exec();
+
   const total = await this.countDocuments(query);
   if (fields?.length === 1) {
     results = results.map((item) => item[fields[0]]);

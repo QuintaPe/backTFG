@@ -22,6 +22,7 @@ routerGuest.get("/:id/lodgings/availables", validateAvailableLodgings, campingLo
 // Relation
 router.get("/favorites", campingCtrl.getFavoriteCampings);
 router.post("/:id/relation", campingRelationCtrl.create);
+router.get("/:id/reviews", campingRelationCtrl.getCampingReviews);
 
 router.get("/", campingCtrl.getOwnCampings);
 router.get("/:id/full", campingCtrl.getFullCamping);

@@ -5,7 +5,9 @@ const jwtSecret = process.env.JWT_SECRET || 'PalabraSecreta';
 const checkUser = (req, res, next) => {
     const auth = req.headers['authorization'];
     const token = auth && auth.split(' ')[1];
-    if (token) {
+
+    const nonAuthPaths = ['/api/v1/login', '/api/v1/signup'];
+    if (token && !nonAuthPaths.includes(req.path)) {
         try {
           const decode = jwt.verify(token, jwtSecret);
           req.user = decode.user;
@@ -42,10 +44,8 @@ const formatQuery = (req, res, next) => {
 
 const errorsMiddleware = (err, req, res, next) => {
   let error = err;
-  console.log(error);
   if (error?.name == 'ValidationError') {
     const aux = Object.values(error.errors)[0];
-    console.log(aux);
     const errorCode = aux.message.toLowerCase().replace(/ /g, '_');
     error = new HandledError(errorCode, aux.message, 422);
   } else if (!error.statusCode || error.statusCode >= 600) {

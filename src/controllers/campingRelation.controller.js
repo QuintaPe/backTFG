@@ -16,7 +16,7 @@ campingRelationController.create = async (req, res, next) => {
     relation.user = user;
   } 
 
-  if (favorite !== undefined) {
+  if (favorite || favorite === false) {
     relation.favorite = favorite;
   }
 
@@ -24,13 +24,15 @@ campingRelationController.create = async (req, res, next) => {
   const sevenDaysAgo = new Date();
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7); 
   const bookingsFilter = {
-    user, exitDate: {
+    user, 
+    exitDate: {
       $gte: sevenDaysAgo,
       $lte: today,
     }
   }
+  console.log(bookingsFilter);
   const bookings = await Booking.search(['id'], bookingsFilter, 1);
-  if (review !== undefined && bookings.total) {
+  if (review && bookings.total) {
     relation.review = review;
   }
 
@@ -42,6 +44,15 @@ campingRelationController.create = async (req, res, next) => {
   
   res.json(relation);
 };
+
+campingRelationController.getCampingReviews = async (req, res, next) => {
+  const camping = req.params.id;
+  const { page, size } = req.query?.opts || {};
+
+  const filters = { camping };
+  const relations = await CampingRelation.search(['user', 'camping', 'review'], filters, size, page, '', 'user');
+  res.status(200).json(relations);
+}
 
 
 module.exports = campingRelationController;
