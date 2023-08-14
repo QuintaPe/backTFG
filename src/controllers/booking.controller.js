@@ -2,8 +2,12 @@ const Booking = require('../models/booking');
 const Camping = require('../models/camping');
 const CampingUnit = require('../models/campingUnit');
 const CampingLodging = require('../models/campingLodging');
+const i18n = require('i18n')
 const Unauthorized = require('../errors/Unauthorized');
+const HandledError = require('../errors/HandledError');
 const { arrayToObj, daysBetweenDates } = require('../utils/functions');
+const transporter = require('../mailer');
+const { formatDate } = require('../helpers/functions');
 
 const bookingController = {};
 
@@ -11,7 +15,7 @@ bookingController.createBooking = async (req, res, next) => {
   const { id } = req.params;
   const { entryDate, exitDate, lodgings, manager, paymentMethod } = req.body;
   try {
-    const booking = new Booking({ camping: id, entryDate, exitDate, manager, paymentMethod, user: req.user._id });
+    const booking = new Booking({ camping: id, entryDate, exitDate, manager, paymentMethod, status: "pending", user: req.user._id });
     const totalDays = daysBetweenDates(exitDate, entryDate);
     let totalCost = 0;
     let units = [];
@@ -88,6 +92,53 @@ bookingController.deleteCampingBooking = async (req, res, next) => {
     await Booking.findByIdAndRemove(booking);
     res.status(200).json({ deleted: booking });
   } catch (error) {
+    next(error);
+  }
+};
+
+bookingController.changeBookingStatus = async (req, res, next) => {
+  const { id, booking, status } = req.params;
+  try {
+    const bookingToEdit = await Booking.findOne({ _id: booking, camping: id }).populate('camping');
+    
+    if (!bookingToEdit) {
+      throw new HandledError('booking_not_found', 'Booking not found')
+    };
+    
+    const isOwner = bookingToEdit.camping.owner.equals(req.user._id);
+    const isUser = bookingToEdit.user.equals(req.user._id);
+    let canEdit = false;
+    
+    if (isOwner) {
+      canEdit = bookingToEdit.status === 'pending'
+        ? ['accepted', 'rejected'].includes(status)
+        : status === 'cancelled';
+    } else if (isUser) {
+      canEdit = status === 'cancelled' && ['accepted', 'pending'].includes(bookingToEdit.status);
+    }
+
+    if (!canEdit) {
+      throw new Unauthorized();
+    };
+
+    i18n.setLocale('en');
+    await transporter.sendMail({
+      from: '"Scoutcamp" <scoutcamp.notifications@gmail.com>',
+      to: "alexquinta99@gmail.com",
+      subject: i18n.__('changeBookingStatusSubject'),
+      html: i18n.__mf('changeBookingStatusMessage', {
+        camping: bookingToEdit.camping.name,
+        entryDate: formatDate(bookingToEdit.entryDate),
+        exitDate: formatDate(bookingToEdit.exitDate),
+        status: i18n.__(status)
+      }),
+    });
+
+    bookingToEdit.status = status;
+    await bookingToEdit.save();
+    res.status(200).json(bookingToEdit);
+  } catch (error) {
+    console.log(error);
     next(error);
   }
 };

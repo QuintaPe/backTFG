@@ -3,6 +3,7 @@ require('dotenv').config();
 
 const app = require('./server');
 require('./database');
+require('./mailer');
 
 // Server is listening
 app.listen(app.get('port'), () => {

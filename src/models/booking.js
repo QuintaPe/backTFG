@@ -21,6 +21,7 @@ BookingSchema.add({
   units: { type: [Schema.Types.ObjectId], ref: 'CampingUnit', required: true },
   totalCost: { type: Number, required: true },
   paymentMethod: { type: String, required: true },
+  status: { type: String, enum: ['pending', 'accepted', 'rejected', 'cancelled'], required: true },
 });
 
 BookingSchema.statics.getCampingBookings = async function (

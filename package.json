@@ -12,18 +12,20 @@
   "author": "Alejandro Quintana Pérez",
   "license": "ISC",
   "dependencies": {
-    "@google-cloud/storage": "^6.9.5",
-    "bcrypt": "^5.0.1",
+    "@google-cloud/storage": "^7.0.1",
+    "bcrypt": "^5.1.0",
     "cors": "^2.8.5",
-    "express": "^4.17.3",
+    "express": "^4.18.2",
     "express-validator": "^7.0.1",
-    "jsonwebtoken": "^9.0.0",
-    "mongoose": "^6.2.6",
+    "i18n": "^0.15.1",
+    "jsonwebtoken": "^9.0.1",
+    "mongoose": "^7.4.3",
     "morgan": "^1.10.0",
-    "multer": "^1.4.5-lts.1"
+    "multer": "^1.4.5-lts.1",
+    "nodemailer": "^6.9.4"
   },
   "devDependencies": {
-    "dotenv": "^16.0.0",
-    "nodemon": "^2.0.15"
+    "dotenv": "^16.3.1",
+    "nodemon": "^3.0.1"
   }
 }

@@ -1,0 +1,7 @@
+{
+	"changeBookingStatusSubject": "Change in the status of your booking",
+    "changeBookingStatusMessage": "The status of your reservation at campsite <b>{camping}</b> from day <b>{entryDate}</b> to day <b>{exitDate}</b> has been <b>{status}</b>",
+	"accepted": "accepted",
+	"rejected": "rejected",
+	"cancelled": "cancelled"
+}

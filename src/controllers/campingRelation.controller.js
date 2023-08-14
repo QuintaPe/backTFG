@@ -30,7 +30,6 @@ campingRelationController.create = async (req, res, next) => {
       $lte: today,
     }
   }
-  console.log(bookingsFilter);
   const bookings = await Booking.search(['id'], bookingsFilter, 1);
   if (review && bookings.total) {
     relation.review = review;

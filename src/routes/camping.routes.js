@@ -33,6 +33,7 @@ router.delete("/:id", campingCtrl.deleteCamping);
 router.post("/:id/bookings", validateCreateBooking, bookingCtrl.createBooking);
 router.get("/:id/bookings", validateCampingBookings, bookingCtrl.getCampingBookings);
 router.delete("/:id/bookings/:booking", bookingCtrl.deleteCampingBooking);
+router.put("/:id/bookings/:booking/status/:status", bookingCtrl.changeBookingStatus);
 
 module.exports = {
     login: router,
