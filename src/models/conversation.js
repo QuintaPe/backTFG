@@ -20,6 +20,11 @@ ConversationSchema.add({
   participants: [ParticipantSchema],
   lastMessage: { type: Schema.Types.ObjectId, ref: 'Message' },
   lastMessageSeen: { type: Map, of: Date },
+  status: {
+    type: String,
+    enum: ['pending', 'opened', 'closed'],
+    default: 'pending',
+  },
 });
 
 

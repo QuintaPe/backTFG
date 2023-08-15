@@ -2,6 +2,7 @@ const Unauthorized = require('../errors/Unauthorized');
 const Conversation = require('../models/conversation');
 const Message = require('../models/message');
 const Camping = require('../models/message');
+const HandledError = require('../errors/HandledError');
 const messagesCtrl = {};
 
 messagesCtrl.createConversation = async (req, res) => {
@@ -53,7 +54,7 @@ messagesCtrl.getConversations = async (req, res, next) => {
 
   try {
     const conversations = await Conversation.search(
-      null, filters, 0, 0, null, 'participants.id'
+      null, filters, 0, 0, null, ['participants.id', 'lastMessage']
     );
     res.status(200).json(conversations);
   } catch (error) {
@@ -63,6 +64,7 @@ messagesCtrl.getConversations = async (req, res, next) => {
 
 messagesCtrl.getConversation = async (req, res, next) => {
   const { id } = req.params;
+  const isAdmin = req.user.role === 'admin';
 
   const conversation = await Conversation.findById(id);
 
@@ -74,6 +76,9 @@ messagesCtrl.getConversation = async (req, res, next) => {
       .populate('sender') // Esto carga los detalles del remitente
       .sort('-createdAt'); // Ordena los mensajes por fecha de creación
 
+    conversation.lastMessageSeen.set(isAdmin ? 'admin' : req.user._id, new Date());
+    conversation.save();
+
     res.status(200).json({ conversation, messages });
   } catch (error) {
     next(error);
@@ -81,31 +86,33 @@ messagesCtrl.getConversation = async (req, res, next) => {
 };
 
 messagesCtrl.sendMessage = async (req, res) => {
-  const conversation = req.params.id;
   const sender = req.user._id;
-  const message = req.body.message;
+  const { subject, message } = req.body;
+  const isAdmin = req.user.role === 'admin';
 
-  // if (
-  //   !conversation.participants.includes(sender) &&
-  //   req.user.role !== 'admin'
-  // ) {
-  //   throw new Unauthorized();
-  // }
+  const conversation = await Conversation.findById(req.params.id);
+  const participant = conversation.participants.find(p => p.id.equals(sender));
+  
+  if (!participant && !isAdmin) {
+    throw new Unauthorized();
+  }
+
+  if (conversation.status === 'pending') {
+    if (!subject) {
+      throw new HandledError('undefined_subject', 'Undefined subject');
+    }
+    conversation.subject = subject;
+  }
 
   const newMessage = new Message({ conversation, sender, message });
-  await newMessage.save();
 
   // Actualizar la conversación con la fecha del último mensaje y del último mensaje visto
-  await Conversation.findByIdAndUpdate(
-    conversation,
-    {
-      lastMessage: newMessage._id,
-      $set: {
-        [`lastMessageSeen.${sender}`]: new Date(),
-      },
-    },
-    { new: true }
-  );
+  conversation.lastMessage = newMessage._id;
+  conversation.status = 'opened';
+  conversation.lastMessageSeen.set(isAdmin ? 'admin' : sender, new Date());
+  
+  conversation.save();
+  await newMessage.save();
   await newMessage.populate('sender')
   res.status(201).json(newMessage);
 };
