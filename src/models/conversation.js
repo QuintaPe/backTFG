@@ -19,7 +19,8 @@ const ParticipantSchema = {
 ConversationSchema.add({
   participants: [ParticipantSchema],
   lastMessage: { type: Schema.Types.ObjectId, ref: 'Message' },
-  lastMessageSeen: { type: Map, of: Date },
+  lastMessageSeen: { type: Map, of: Date, default: {} },
+  subject: String,
   status: {
     type: String,
     enum: ['pending', 'opened', 'closed'],
