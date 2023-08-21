@@ -13,7 +13,7 @@ const {
 const app = express();
 
 // Settings
-app.set('port', process.env.PORT || 3000);
+app.set('port', process.env.PORT);
 i18n.configure({
   locales: ['es', 'en', 'fr', 'de'],
   directory: 'src/i18n',

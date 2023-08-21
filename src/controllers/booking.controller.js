@@ -1,8 +1,9 @@
 const Booking = require('../models/booking');
 const Camping = require('../models/camping');
+const User = require('../models/user');
 const CampingUnit = require('../models/campingUnit');
 const CampingLodging = require('../models/campingLodging');
-const i18n = require('i18n')
+const i18n = require('i18n');
 const Unauthorized = require('../errors/Unauthorized');
 const HandledError = require('../errors/HandledError');
 const { arrayToObj, daysBetweenDates } = require('../utils/functions');
@@ -108,23 +109,26 @@ bookingController.changeBookingStatus = async (req, res, next) => {
     const isOwner = bookingToEdit.camping.owner.equals(req.user._id);
     const isUser = bookingToEdit.user.equals(req.user._id);
     let canEdit = false;
+    let receiver = false;
     
     if (isOwner) {
       canEdit = bookingToEdit.status === 'pending'
         ? ['accepted', 'rejected'].includes(status)
         : status === 'cancelled';
+      receiver = await User.findById(bookingToEdit.user);
     } else if (isUser) {
       canEdit = status === 'cancelled' && ['accepted', 'pending'].includes(bookingToEdit.status);
+      receiver = await User.findById(bookingToEdit.camping.owner);
     }
 
     if (!canEdit) {
       throw new Unauthorized();
     };
 
-    i18n.setLocale('en');
+    i18n.setLocale(receiver.lang);
     await transporter.sendMail({
       from: '"Scoutcamp" <scoutcamp.notifications@gmail.com>',
-      to: "alexquinta99@gmail.com",
+      to: receiver.email,
       subject: i18n.__('changeBookingStatusSubject'),
       html: i18n.__mf('changeBookingStatusMessage', {
         camping: bookingToEdit.camping.name,

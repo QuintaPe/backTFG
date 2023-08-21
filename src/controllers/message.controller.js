@@ -3,14 +3,13 @@ const Conversation = require('../models/conversation');
 const Message = require('../models/message');
 const Camping = require('../models/camping');
 const HandledError = require('../errors/HandledError');
+const conversation = require('../models/conversation');
 const messagesCtrl = {};
 
 messagesCtrl.createConversation = async (req, res) => {
   // Crear una nueva conversación con los participantes dados
   const { type, id, camping } = req.body;
-  const participants = [
-    { type, id },
-  ];
+  const participants = [{ type, id }];
 
   if (camping) {
     const CampingObject = await Camping.findById(camping);
@@ -48,7 +47,6 @@ messagesCtrl.getConversations = async (req, res, next) => {
   try {
     if (type === 'Camping') {
       const CampingObject = await Camping.findById(id);
-      console.log(CampingObject)
       if (!CampingObject.owner.equals(req.user._id)) {
         throw new Unauthorized();
       }
@@ -70,41 +68,70 @@ messagesCtrl.getConversations = async (req, res, next) => {
 };
 
 messagesCtrl.getConversation = async (req, res, next) => {
-  const { id } = req.params;
-  const isAdmin = req.user.role === 'admin';
-
-  const conversation = await Conversation.findById(id);
-
-  if (!conversation.participants.find(p => p?.id?.equals(req.user._id)) && req.user.role !== 'admin') {
-    throw new Unauthorized();
-  }
   try {
+    const { id } = req.params;
+    const isAdmin = req.user.role === 'admin';
+
+    let conversation = await Conversation.findById(id).populate('participants.id');
+
+    let isParticipant = false;
+    for (const p of conversation.participants) {
+      if (p.type === 'Camping') {
+        const camping = await Camping.findById(p.id);
+        if (camping?.owner?.equals(req.user._id)) {
+          isParticipant = camping._id;
+          break;
+        }
+      } else if (p?.id?.equals(req.user._id)) {
+        isParticipant = p.id;
+        break;
+      }
+    }
+    
+    if (!isParticipant && !isAdmin) {
+      throw new Unauthorized();
+    }
+    
     const messages = await Message.find({ conversation: id })
-      .populate('sender') // Esto carga los detalles del remitente
-      .sort('-createdAt'); // Ordena los mensajes por fecha de creación
+      .populate('sender').sort('-createdAt');
 
     if (conversation.status !== 'pending') {
       conversation.lastMessageSeen.set(isAdmin ? 'admin' : req.user._id, new Date());
-      conversation.save();
+      await conversation.save();
     }
+
+    conversation = conversation.toObject();
+    conversation.participant = isParticipant || null;
 
     res.status(200).json({ conversation, messages });
   } catch (error) {
-    console.log(error)
+    console.log(error);
     next(error);
   }
 };
 
-messagesCtrl.sendMessage = async (req, res) => {
+messagesCtrl.sendMessage = async (req, res, next) => {
   const sender = req.user._id;
   const { subject, message } = req.body;
   const isAdmin = req.user.role === 'admin';
 
   try {
     const conversation = await Conversation.findById(req.params.id);
-    const participant = conversation.participants.find(p => p.id && p.id.equals(sender));
-    
-    if (!participant && !isAdmin) {
+    let isParticipant = false;
+    for (const p of conversation.participants) {
+      if (p.type === 'Camping') {
+        const camping = await Camping.findById(p.id);
+        if (camping?.owner?.equals(req.user._id)) {
+          isParticipant = true;
+          break;
+        }
+      } else if (p?.id?.equals(req.user._id)) {
+        isParticipant = true;
+        break;
+      }
+    }
+
+    if (!isParticipant && !isAdmin) {
       throw new Unauthorized();
     }
 

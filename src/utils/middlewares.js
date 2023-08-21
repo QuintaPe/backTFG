@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const HandledError = require('../errors/HandledError');
-const jwtSecret = process.env.JWT_SECRET || 'PalabraSecreta';
+const jwtSecret = process.env.JWT_SECRET;
 
 const checkUser = (req, res, next) => {
     const auth = req.headers['authorization'];

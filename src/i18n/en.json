@@ -1,7 +1,10 @@
 {
-	"changeBookingStatusSubject": "Change in the status of your booking",
-    "changeBookingStatusMessage": "The status of your reservation at campsite <b>{camping}</b> from day <b>{entryDate}</b> to day <b>{exitDate}</b> has been <b>{status}</b>",
+	"changeBookingStatusSubject": "Change in your booking status",
+	"changeBookingStatusMessage": "The status of your booking at the campsite <b>{camping}</b> from <b>{entryDate}</b> to <b>{exitDate}</b> has changed to <b>{status}</b>",
 	"accepted": "accepted",
 	"rejected": "rejected",
-	"cancelled": "cancelled"
+	"cancelled": "cancelled",
+	
+	"passwordResetSubject": "Reset Password",
+	"passwordResetMessage": "<p>You have requested to reset your password. Click <a href='{baseUrl}/auth/recovery-password/{token}'>here</a> to reset your password.</p>"
 }

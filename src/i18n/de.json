@@ -1,1 +1,10 @@
-{}
+{
+	"changeBookingStatusSubject": "Änderung des Buchungsstatus",
+	"changeBookingStatusMessage": "Der Status Ihrer Buchung auf dem Campingplatz <b>{camping}</b> vom <b>{entryDate}</b> bis zum <b>{exitDate}</b> wurde auf <b>{status}</b> geändert",
+	"accepted": "akzeptiert",
+	"rejected": "abgelehnt",
+	"cancelled": "storniert",
+	
+	"passwordResetSubject": "Passwort zurücksetzen",
+	"passwordResetMessage": "<p>Sie haben eine Zurücksetzung Ihres Passworts angefordert. Klicken Sie <a href='{baseUrl}/auth/recovery-password/{token}'>hier</a>, um Ihr Passwort zurückzusetzen.</p>"
+}

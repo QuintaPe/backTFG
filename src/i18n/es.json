@@ -3,5 +3,9 @@
     "changeBookingStatusMessage": "El estado de su reserva en el campamento <b>{camping}</b> del dia <b>{entryDate}</b> al dia <b>{exitDate}</b> ha sido <b>{status}</b>",
 	"accepted": "aceptada",
 	"rejected": "rechazada",
-	"cancelled": "cancelada"
+	"cancelled": "cancelada",
+
+	"passwordResetSubject": "Restablecer la contraseña",
+	"passwordResetMessage": "<p>Has solicitado restablecer tu contraseña. Haz clic <a href=''{baseUrl}/auth/recovery-password/{token}'>aquí</a> para restablecer tu contraseña.</p>"
+	
 }

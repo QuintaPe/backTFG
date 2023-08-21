@@ -1,1 +1,10 @@
-{}
+{
+	"changeBookingStatusSubject": "Changement de statut de votre réservation",
+	"changeBookingStatusMessage": "Le statut de votre réservation au camping <b>{camping}</b> du <b>{entryDate}</b> au <b>{exitDate}</b> a été modifié à <b>{status}</b>",
+	"accepted": "acceptée",
+	"rejected": "refusée",
+	"cancelled": "annulée",
+	
+	"passwordResetSubject": "Réinitialisation du mot de passe",
+	"passwordResetMessage": "<p>Vous avez demandé la réinitialisation de votre mot de passe. Cliquez <a href='{baseUrl}/auth/recovery-password/{token}'>ici</a> pour réinitialiser votre mot de passe.</p>"
+}
