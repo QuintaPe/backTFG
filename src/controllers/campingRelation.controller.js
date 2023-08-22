@@ -36,7 +36,7 @@ campingRelationController.create = async (req, res, next) => {
   }
 
   if (!relation.favorite && !relation.review) {
-    relation.delete();
+    relation.deleteOne();
   } else {
     relation.save();
   }
@@ -48,7 +48,7 @@ campingRelationController.getCampingReviews = async (req, res, next) => {
   const camping = req.params.id;
   const { page, size } = req.query?.opts || {};
 
-  const filters = { camping };
+  const filters = { camping, review: { $ne: null } };
   const relations = await CampingRelation.search(['user', 'camping', 'review'], filters, size, page, '', 'user');
   res.status(200).json(relations);
 }

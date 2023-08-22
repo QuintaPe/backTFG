@@ -1,6 +1,12 @@
 {
+	"hello": "Hola {name}",
+	"theScoutcampTeam": "Atentamente, el equipo de Scoutcamp",
+	
+	
+	"newBookingSubject": "Nueva reserva en tu campamento",
+	"newBookingMessage": "Tienes una nueva reserva en tu campamento {camping} el dia <b>{entryDate}</b> al dia <b>{exitDate}</b> pendiente de aprobación",
 	"changeBookingStatusSubject": "Cambio en el estado de tu reserva",
-    "changeBookingStatusMessage": "El estado de su reserva en el campamento <b>{camping}</b> del dia <b>{entryDate}</b> al dia <b>{exitDate}</b> ha sido <b>{status}</b>",
+    "changeBookingStatusMessage": "El estado de su reserva en el campamento <b>{camping}</b> del dia <b>{entryDate}</b> al dia <b>{exitDate}</b> ha cambiado a <b>{status}</b>",
 	"accepted": "aceptada",
 	"rejected": "rechazada",
 	"cancelled": "cancelada",

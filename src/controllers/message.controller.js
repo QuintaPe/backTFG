@@ -62,7 +62,6 @@ messagesCtrl.getConversations = async (req, res, next) => {
 
     res.status(200).json(conversations);
   } catch (error) {
-    console.log(error);
     next(error);
   }
 };
@@ -105,7 +104,6 @@ messagesCtrl.getConversation = async (req, res, next) => {
 
     res.status(200).json({ conversation, messages });
   } catch (error) {
-    console.log(error);
     next(error);
   }
 };
@@ -157,7 +155,6 @@ messagesCtrl.sendMessage = async (req, res, next) => {
     await newMessage.populate('sender')
     res.status(201).json(newMessage);
   } catch (error) {
-    console.log(error)
     next(error);
   }
 };

@@ -66,7 +66,10 @@ campingUnitSchema.statics.getCampingUnitBooked = async function (
     camping,
     entryDate,
     exitDate,
-    { fields: ['units'] }
+    { 
+      fields: ['units'], 
+      filters: { status: { $nin: ['rejected', 'cancelled'] }}
+    }
   );
   return bookings.items.reduce((prev, curr) => [...prev, ...curr], []);
 };

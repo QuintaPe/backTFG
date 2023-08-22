@@ -119,11 +119,7 @@ campingLodgingSchema.statics.getAvailableLodgings = async function (
     );
     const campingLodgingAvailables = {};
     availableUnits.items.forEach((element) => {
-      campingLodgingAvailables[element.lodging] = campingLodgingAvailables[
-        element.lodging
-      ]
-        ? campingLodgingAvailables[element.lodging] + 1
-        : 1;
+      campingLodgingAvailables[element.lodging] = (campingLodgingAvailables[element.lodging] || 0) + 1;
     });
 
     const searchFilters = {

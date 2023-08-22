@@ -11,7 +11,10 @@ campingRelationSchema.add({
   user: { type: Schema.Types.ObjectId, ref: 'User' },
   camping: { type: Schema.Types.ObjectId, ref: 'Camping' },
   favorite: { type: Boolean, default: false },
-  review: review
+  review: {
+    type: review,
+    default: null,
+  }
 });
 
 module.exports = model('CampingRelation', campingRelationSchema, 'camping_relations');

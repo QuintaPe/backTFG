@@ -175,6 +175,7 @@ campingSchema.statics.getCampings = async function (page, size, user, opts) {
                   { $gte: ['$exitDate', new Date(opts.entryDate)] },
                 ],
               },
+              status: { $nin: ['rejected', 'cancelled']},
             },
           },
           {

@@ -34,9 +34,10 @@ BookingSchema.statics.getCampingBookings = async function (
   const { page, size, filters, sort, fields, populate } = opts;
 
   const searchFilters = { ...filters, camping };
+
   if (entryDate && exitDate) {
-    searchFilters.entryDate = { $gte: entryDate };
-    searchFilters.exitDate = { $lte: exitDate };
+    searchFilters.entryDate = { $lte: exitDate };
+    searchFilters.exitDate = { $gte: entryDate }; 
   }
 
   return Booking.search(

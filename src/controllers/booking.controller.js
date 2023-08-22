@@ -7,8 +7,8 @@ const i18n = require('i18n');
 const Unauthorized = require('../errors/Unauthorized');
 const HandledError = require('../errors/HandledError');
 const { arrayToObj, daysBetweenDates } = require('../utils/functions');
-const transporter = require('../mailer');
 const { formatDate } = require('../helpers/functions');
+const sendEmail = require('../mailer');
 
 const bookingController = {};
 
@@ -36,6 +36,21 @@ bookingController.createBooking = async (req, res, next) => {
     booking.units = units.flatMap(unit => unit.items);
     booking.totalCost = totalCost;
     await booking.save();
+
+    const camping = await Camping.findById(id);
+    const receiver = await User.findById(camping.owner);
+
+    i18n.setLocale(receiver.lang);
+    await sendEmail(
+      receiver, 
+      i18n.__('newBookingSubject'),
+      i18n.__mf('newBookingMessage', {
+        camping: camping.name,
+        entryDate: formatDate(booking.entryDate),
+        exitDate: formatDate(booking.exitDate),
+      }),
+    );
+
     res.status(201).json(booking);
   } catch (error) {
     next(error);
@@ -126,23 +141,21 @@ bookingController.changeBookingStatus = async (req, res, next) => {
     };
 
     i18n.setLocale(receiver.lang);
-    await transporter.sendMail({
-      from: '"Scoutcamp" <scoutcamp.notifications@gmail.com>',
-      to: receiver.email,
-      subject: i18n.__('changeBookingStatusSubject'),
-      html: i18n.__mf('changeBookingStatusMessage', {
+    await sendEmail(
+      receiver,
+      i18n.__('changeBookingStatusSubject'),
+      i18n.__mf('changeBookingStatusMessage', {
         camping: bookingToEdit.camping.name,
         entryDate: formatDate(bookingToEdit.entryDate),
         exitDate: formatDate(bookingToEdit.exitDate),
         status: i18n.__(status)
       }),
-    });
+    );
 
     bookingToEdit.status = status;
     await bookingToEdit.save();
     res.status(200).json(bookingToEdit);
   } catch (error) {
-    console.log(error);
     next(error);
   }
 };
