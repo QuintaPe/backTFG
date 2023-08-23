@@ -36,8 +36,7 @@ app.use(checkUser);
 // Routes
 app.use('/api/v1/users', authMiddleware, require('./routes/user.routes'));
 app.use('/api/v1/conversations', authMiddleware, require('./routes/conversation.routes'));
-app.use('/api/v1/campings', authMiddleware, require('./routes/camping.routes').login);
-app.use('/api/v1/campings', require('./routes/camping.routes').guest);
+app.use('/api/v1/campings', require('./routes/camping.routes'));
 app.use('/api/v1/documents', require('./routes/document.routes'));
 app.use('/api/v1/', require('./routes/auth.routes'));
 
