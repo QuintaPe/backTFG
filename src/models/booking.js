@@ -1,7 +1,7 @@
 const { Schema, model } = require('mongoose');
 const databaseSchema = require('./database');
 const CampingRelation = require('./campingRelation');
-const { arrayToObj } = require('../utils/functions');
+const { arrayToObj } = require('../helpers/functions');
 
 const BookingSchema = databaseSchema.clone();
 

@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const HandledError = require('../errors/HandledError');
+const HandledError = require('./errors/HandledError');
 const jwtSecret = process.env.JWT_SECRET;
 
 const checkUser = (req, res, next) => {

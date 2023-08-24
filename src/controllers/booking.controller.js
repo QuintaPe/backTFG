@@ -6,7 +6,7 @@ const CampingLodging = require('../models/campingLodging');
 const i18n = require('i18n');
 const Unauthorized = require('../errors/Unauthorized');
 const HandledError = require('../errors/HandledError');
-const { arrayToObj, daysBetweenDates } = require('../utils/functions');
+const { arrayToObj, daysBetweenDates } = require('../helpers/functions');
 const { formatDate } = require('../helpers/functions');
 const sendEmail = require('../mailer');
 

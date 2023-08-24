@@ -2,7 +2,7 @@ const { Schema, model } = require('mongoose');
 const Unauthorized = require('../errors/Unauthorized');
 const databaseSchema = require('./database');
 const CampingRelation = require('./campingRelation');
-const { arrayToObj } = require('../utils/functions');
+const { arrayToObj } = require('../helpers/functions');
 const campingSchema = databaseSchema.clone();
 
 const location = {

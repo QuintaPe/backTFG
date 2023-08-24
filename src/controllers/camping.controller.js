@@ -5,7 +5,7 @@ const CampingLodging = require('../models/campingLodging');
 const CampingUnit = require('../models/campingUnit');
 const CampingRelation = require('../models/campingRelation');
 const NotFound = require('../errors/NotFound');
-const { arrayToObj } = require('../utils/functions');
+const { arrayToObj } = require('../helpers/functions');
 
 const campingController = {};
 

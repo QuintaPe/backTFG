@@ -51,10 +51,6 @@ documentController.downloadDocument = async (req, res, next) => {
       throw new Error('El archivo no existe.');
     }
 
-    if (!document.public) {
-      // TODO: Verificar si el usuario tiene permiso para acceder al archivo
-    }
-
     res.set('Content-Type', document.type);
     file.createReadStream().pipe(res);
   } catch (error) {

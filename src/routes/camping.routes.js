@@ -5,7 +5,7 @@ const campingCtrl = require("../controllers/camping.controller");
 const campingRelationCtrl = require("../controllers/campingRelation.controller");
 const campingLodgingCtrl = require("../controllers/campingLodging.controller");
 const bookingCtrl = require("../controllers/booking.controller");
-const { authMiddleware } = require("../utils/middlewares");
+const { authMiddleware } = require("../middlewares");
 
 const { 
     validateCampingLodgings,
