@@ -29,7 +29,7 @@ El proyecto **ScoutCamp** es una aplicación web desarrollada en Angular que tie
 
 ## Estructura del Proyecto
 
-**src:**
+- **src:**
   - **controllers:** Controladores de la aplicación, que manejan la lógica y la interacción con la base de datos.
   - **errors:** Archivos relacionados con el manejo de errores, como clases de excepción personalizadas.
   - **helpers:** Funciones auxiliares y utilidades utilizadas en varios lugares del proyecto.
@@ -44,13 +44,13 @@ El proyecto **ScoutCamp** es una aplicación web desarrollada en Angular que tie
 - **middlewares.js:** Middlewares de la aplicación.
 
 
-
 ## Futuras lineas
 - [ ] Implementación de sistema de pago en línea para las reservas.
 - [ ] Integración de notificaciones push para mantener a los usuarios informados en tiempo real.
 - [ ] Mejoras en la interfaz de administración para una gestión más eficiente.
 - [ ] Ampliación de opciones de personalización de campamentos.
 - [ ] Integración con plataformas de redes sociales para compartir experiencias
+
 
 ## Contacto
 - [Alejandro Quintana Pérez](mailto:alexquintape@gmail.com)
