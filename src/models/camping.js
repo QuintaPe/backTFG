@@ -152,7 +152,7 @@ campingSchema.statics.getCampings = async function (page, size, user, opts) {
         },
         distanceField: 'distance',
         spherical: true,
-        maxDistance: 10000,
+        maxDistance: 20000,
         query: {},
         includeLocs: 'location.coords',
         distanceMultiplier: 0.001,

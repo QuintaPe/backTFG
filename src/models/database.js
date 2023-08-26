@@ -14,10 +14,32 @@ databaseSchema.statics.search = async function (
   populate = '',
   lean = false,
 ) {
+  function transformSortNotation(inputNotation) {
+    
+    if (!inputNotation || typeof inputNotation !== 'string') return '';
+    
+    const sortObject = {};
+    
+    console.log(inputNotation)
+    const parts = inputNotation.split(',');
+
+    parts.forEach(part => {
+      const trimmedPart = part.trim();
+      const fieldName = trimmedPart.slice(1);
+        if (trimmedPart.startsWith('-')) {
+            sortObject[fieldName] = -1;
+        } else {
+            sortObject[fieldName] = 1;
+        }
+    });
+
+    return sortObject;
+  }
+
   const options = {
     limit: +size === 0 ? 10000 : +size,
     skip: +size === 0 ? 0 : +size * +page,
-    sort,
+    sort: transformSortNotation(sort),
     populate,
   };
 
