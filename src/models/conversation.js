@@ -1,6 +1,6 @@
-const { model, Schema } = require('mongoose');
+import { model, Schema } from 'mongoose';
+import databaseSchema from './database.js';
 
-const databaseSchema = require('./database');
 const ConversationSchema = databaseSchema.clone();
 
 const ParticipantSchema = {
@@ -29,4 +29,4 @@ ConversationSchema.add({
 });
 
 
-module.exports = model('Conversation', ConversationSchema);
+export default model('Conversation', ConversationSchema);

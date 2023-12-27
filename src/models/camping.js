@@ -1,8 +1,8 @@
-const { Schema, model } = require('mongoose');
-const Unauthorized = require('../errors/Unauthorized');
-const databaseSchema = require('./database');
-const CampingRelation = require('./campingRelation');
-const { arrayToObj } = require('../helpers/functions');
+import { Schema, model } from 'mongoose';
+import databaseSchema from './database.js';
+import CampingRelation from './campingRelation.js';
+import { arrayToObj } from '../helpers/functions.js';
+import { Unauthorized } from '../errors/Unauthorized.js';
 const campingSchema = databaseSchema.clone();
 
 const location = {
@@ -247,26 +247,21 @@ campingSchema.statics.getCampings = async function (page, size, user, opts) {
     { $limit: size },
   );
 
-  try {
-    let campings = await Camping.aggregate(filters);
+  let campings = await Camping.aggregate(filters);
   
-    if (user) {  
-      const auxFilters = {
-        camping: campings.map(camping => camping._id),
-        user
-      }
-      let relations = await CampingRelation.search(null, auxFilters);
-      relations = arrayToObj(relations.items, 'camping');
-      
-      campings = campings.map(camping => ({
-        ...camping, relation: relations[camping._id] || null,
-      }))
+  if (user) {  
+    const auxFilters = {
+      camping: campings.map(camping => camping._id),
+      user
     }
-    return { items: campings, total: campings.length };
-  } catch (err) {
-    throw err;
+    let relations = await CampingRelation.search(null, auxFilters);
+    relations = arrayToObj(relations.items, 'camping');
+      
+    campings = campings.map(camping => ({
+      ...camping, relation: relations[camping._id] || null,
+    }))
   }
-
+  return { items: campings, total: campings.length };
 };
 
-module.exports = model('Camping', campingSchema);
+export default model('Camping', campingSchema);

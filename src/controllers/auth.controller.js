@@ -1,10 +1,9 @@
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const User = require('../models/user');
-const sendEmail = require('../mailer');
-
-const i18n = require('i18n');
-const HandledError = require('../errors/HandledError');
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import i18n from 'i18n';
+import User from '../models/user.js';
+import { sendEmail } from '../mailer.js';
+import { HandledError } from '../errors/HandledError.js';
 
 const jwtSecret = process.env.JWT_SECRET;
 const authCtrl = {};
@@ -95,4 +94,4 @@ authCtrl.resetPassword = async (req, res, next) => {
   }
 };
 
-module.exports = authCtrl;
+export default authCtrl;

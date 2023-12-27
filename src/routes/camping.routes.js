@@ -1,40 +1,38 @@
-const express = require("express");
-const router = express.Router();
+import express from 'express';
+import campingCtrl from '../controllers/camping.controller.js';
+import campingRelationCtrl from '../controllers/campingRelation.controller.js';
+import campingLodgingCtrl from '../controllers/campingLodging.controller.js';
+import bookingCtrl from '../controllers/booking.controller.js';
+import { authMiddleware } from '../middlewares/middlewares.js';
 
-const campingCtrl = require("../controllers/camping.controller");
-const campingRelationCtrl = require("../controllers/campingRelation.controller");
-const campingLodgingCtrl = require("../controllers/campingLodging.controller");
-const bookingCtrl = require("../controllers/booking.controller");
-const { authMiddleware } = require("../middlewares");
+import { 
+  validateCampingLodgings,
+  validateAvailableLodgings,
+  validateCreateBooking,
+  validateCampingBookings, 
+} from "../validators/camping.js";
 
-const { 
-    validateCampingLodgings,
-    validateAvailableLodgings,
-    validateCreateBooking,
-    validateCampingBookings, 
-} = require("../validators/camping");
+export const campingRouter = express.Router();
+campingRouter.get("/availables", campingCtrl.getAvailableCampings);
+campingRouter.get("/favorites", authMiddleware, campingCtrl.getFavoriteCampings);
 
-router.get("/availables", campingCtrl.getAvailableCampings);
-router.get("/favorites", authMiddleware, campingCtrl.getFavoriteCampings);
+campingRouter.get("/:id", campingCtrl.getCamping);
+campingRouter.get("/:id/lodgings", validateCampingLodgings, campingLodgingCtrl.getCampingLodgings);
+campingRouter.get("/:id/lodgings/availables", validateAvailableLodgings, campingLodgingCtrl.getAvailableLodgings);
+campingRouter.get("/:id/reviews", campingRelationCtrl.getCampingReviews);
 
-router.get("/:id", campingCtrl.getCamping);
-router.get("/:id/lodgings", validateCampingLodgings, campingLodgingCtrl.getCampingLodgings);
-router.get("/:id/lodgings/availables", validateAvailableLodgings, campingLodgingCtrl.getAvailableLodgings);
-router.get("/:id/reviews", campingRelationCtrl.getCampingReviews);
+campingRouter.use(authMiddleware);
 
-router.use(authMiddleware);
+campingRouter.get("/", campingCtrl.getOwnCampings);
+campingRouter.post("/", campingCtrl.createCamping);
+campingRouter.put("/:id", campingCtrl.createCamping);
+campingRouter.delete("/:id", campingCtrl.deleteCamping);
+campingRouter.get("/:id/full", campingCtrl.getFullCamping);
 
-router.get("/", campingCtrl.getOwnCampings);
-router.post("/", campingCtrl.createCamping);
-router.put("/:id", campingCtrl.createCamping);
-router.delete("/:id", campingCtrl.deleteCamping);
-router.get("/:id/full", campingCtrl.getFullCamping);
+campingRouter.post("/:id/relation", campingRelationCtrl.create);
 
-router.post("/:id/relation", campingRelationCtrl.create);
+campingRouter.post("/:id/bookings", validateCreateBooking, bookingCtrl.createBooking);
+campingRouter.get("/:id/bookings", validateCampingBookings, bookingCtrl.getCampingBookings);
+campingRouter.delete("/:id/bookings/:booking", bookingCtrl.deleteCampingBooking);
+campingRouter.put("/:id/bookings/:booking/status/:status", bookingCtrl.changeBookingStatus);
 
-router.post("/:id/bookings", validateCreateBooking, bookingCtrl.createBooking);
-router.get("/:id/bookings", validateCampingBookings, bookingCtrl.getCampingBookings);
-router.delete("/:id/bookings/:booking", bookingCtrl.deleteCampingBooking);
-router.put("/:id/bookings/:booking/status/:status", bookingCtrl.changeBookingStatus);
-
-module.exports = router;

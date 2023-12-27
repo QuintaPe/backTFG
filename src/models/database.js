@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const databaseSchema = new mongoose.Schema(
   {},
@@ -26,11 +26,11 @@ databaseSchema.statics.search = async function (
     parts.forEach(part => {
       const trimmedPart = part.trim();
       const fieldName = trimmedPart.slice(1);
-        if (trimmedPart.startsWith('-')) {
-            sortObject[fieldName] = -1;
-        } else {
-            sortObject[fieldName] = 1;
-        }
+      if (trimmedPart.startsWith('-')) {
+        sortObject[fieldName] = -1;
+      } else {
+        sortObject[fieldName] = 1;
+      }
     });
 
     return sortObject;
@@ -64,4 +64,4 @@ databaseSchema.statics.search = async function (
   return { items: results, total: total };
 };
 
-module.exports = databaseSchema;
+export default databaseSchema;

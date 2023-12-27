@@ -1,7 +1,7 @@
-const express = require('express');
-const multer = require('multer');
-const { authMiddleware } = require('../middlewares');
-const router = express.Router();
+import express from 'express';
+import multer from 'multer';
+import documentCtrl from '../controllers/document.controller.js';
+import { authMiddleware } from '../middlewares/middlewares.js';
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -10,9 +10,6 @@ const upload = multer({
   },
 });
 
-const documentCtrl = require('../controllers/document.controller');
-
-router.post("", authMiddleware, upload.single('document'), documentCtrl.createDocument);
-router.get("/:id", documentCtrl.downloadDocument);
-
-module.exports = router;
+export const documentRouter = express.Router();
+documentRouter.post("", authMiddleware, upload.single('document'), documentCtrl.createDocument);
+documentRouter.get("/:id", documentCtrl.downloadDocument);

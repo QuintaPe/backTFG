@@ -1,10 +1,9 @@
-const { Schema, model } = require('mongoose');
-const databaseSchema = require('./database');
+import { Schema, model } from 'mongoose';
+import databaseSchema from './database.js';
+import Booking from './booking.js';
+import { Unauthorized } from '../errors/Unauthorized.js';
+
 const campingUnitSchema = databaseSchema.clone();
-
-const Unauthorized = require('../errors/Unauthorized');
-const Booking = require('./booking');
-
 campingUnitSchema.add({
   lodging: {
     type: Schema.Types.ObjectId,
@@ -104,4 +103,4 @@ campingUnitSchema.statics.getAvailableUnits = async function (
   return availableUnits;
 };
 
-module.exports = model('CampingUnit', campingUnitSchema, 'camping_units');
+export default model('CampingUnit', campingUnitSchema, 'camping_units');

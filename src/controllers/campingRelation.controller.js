@@ -1,9 +1,9 @@
-const Booking = require('../models/booking');
-const CampingRelation = require('../models/campingRelation');
+import Booking from '../models/booking.js';
+import CampingRelation from '../models/campingRelation.js';
 const campingRelationController = {};
 
 // Get all campings
-campingRelationController.create = async (req, res, next) => {
+campingRelationController.create = async (req, res) => {
   const camping = req.params.id;
   const user = req.user._id;
   const { favorite, review } = req.body;
@@ -44,7 +44,7 @@ campingRelationController.create = async (req, res, next) => {
   res.json(relation);
 };
 
-campingRelationController.getCampingReviews = async (req, res, next) => {
+campingRelationController.getCampingReviews = async (req, res) => {
   const camping = req.params.id;
   const { page, size } = req.query?.opts || {};
 
@@ -54,4 +54,4 @@ campingRelationController.getCampingReviews = async (req, res, next) => {
 }
 
 
-module.exports = campingRelationController;
+export default campingRelationController;

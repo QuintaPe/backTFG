@@ -1,11 +1,10 @@
-const Unauthorized = require('../errors/Unauthorized');
-const Conversation = require('../models/conversation');
-const Message = require('../models/message');
-const Camping = require('../models/camping');
-const HandledError = require('../errors/HandledError');
-const conversation = require('../models/conversation');
-const messagesCtrl = {};
+import Conversation from '../models/conversation.js';
+import Message from '../models/message.js';
+import Camping from '../models/camping.js';
+import { HandledError } from '../errors/HandledError.js';
+import { Unauthorized } from '../errors/Unauthorized.js';
 
+const messagesCtrl = {};
 messagesCtrl.createConversation = async (req, res) => {
   // Crear una nueva conversación con los participantes dados
   const { type, id, camping } = req.body;
@@ -41,7 +40,7 @@ messagesCtrl.createConversation = async (req, res) => {
 
 messagesCtrl.getConversations = async (req, res, next) => {
   const { type, id, opts } = req.query;
-  const { page, size, search, filters = {}, sort } = opts;
+  const { page, size, filters = {}, sort } = opts;
   const isAdmin = req.user.role === 'admin';
 
   try {
@@ -159,4 +158,4 @@ messagesCtrl.sendMessage = async (req, res, next) => {
   }
 };
 
-module.exports = messagesCtrl;
+export default messagesCtrl;

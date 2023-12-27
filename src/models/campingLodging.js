@@ -1,9 +1,9 @@
-const { Schema, model } = require('mongoose');
-const databaseSchema = require('./database');
-const campingLodgingSchema = databaseSchema.clone();
-const CampingUnit = require('./campingUnit');
-const Unauthorized = require('../errors/Unauthorized');
+import { Schema, model } from 'mongoose';
+import databaseSchema from './database.js';
+import CampingUnit from './campingUnit.js';
+import { Unauthorized } from '../errors/Unauthorized.js';
 
+const campingLodgingSchema = databaseSchema.clone();
 campingLodgingSchema.add({
   camping: { type: Schema.Types.ObjectId, ref: 'Camping' },
   type: {
@@ -108,43 +108,40 @@ campingLodgingSchema.statics.getAvailableLodgings = async function (
   const CampingLodging = this;
   const { page = 0, size = 0, filters = {}, sort = '' } = opts;
 
-  try {
-    const lodgings = await CampingLodging.search(['_id'], { camping });
-    const availableUnits = await CampingUnit.getAvailableUnits(
-      camping,
-      lodgings.items,
-      entryDate,
-      exitDate,
-      {}
-    );
-    const campingLodgingAvailables = {};
-    availableUnits.items.forEach((element) => {
-      campingLodgingAvailables[element.lodging] = (campingLodgingAvailables[element.lodging] || 0) + 1;
-    });
+  const lodgings = await CampingLodging.search(['_id'], { camping });
+  const availableUnits = await CampingUnit.getAvailableUnits(
+    camping,
+    lodgings.items,
+    entryDate,
+    exitDate,
+    {}
+  );
+  const campingLodgingAvailables = {};
+  availableUnits.items.forEach((element) => {
+    campingLodgingAvailables[element.lodging] = (campingLodgingAvailables[element.lodging] || 0) + 1;
+  });
 
-    const searchFilters = {
-      ...filters,
-      _id: { $in: Object.keys(campingLodgingAvailables) },
-    };
-    const campingLodgings = await CampingLodging.search(
-      null,
-      searchFilters,
-      size,
-      page,
-      sort
-    );
-    campingLodgings.items = campingLodgings.items.map((lodging) => {
-      lodging.availables = campingLodgingAvailables[lodging._id];
-      return lodging;
-    });
+  const searchFilters = {
+    ...filters,
+    _id: { $in: Object.keys(campingLodgingAvailables) },
+  };
+  const campingLodgings = await CampingLodging.search(
+    null,
+    searchFilters,
+    size,
+    page,
+    sort
+  );
+  campingLodgings.items = campingLodgings.items.map((lodging) => {
+    lodging.availables = campingLodgingAvailables[lodging._id];
+    return lodging;
+  });
 
-    return campingLodgings;
-  } catch (err) {
-    throw err;
-  }
+  return campingLodgings;
+
 };
 
-module.exports = model(
+export default model(
   'CampingLodging',
   campingLodgingSchema,
   'camping_lodgings'

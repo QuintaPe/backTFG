@@ -1,13 +1,8 @@
-const express = require('express');
-const router = express.Router();
+import express from 'express';
+import messageCtrl from '../controllers/message.controller.js';
 
-const messageCtrl = require('../controllers/message.controller');
-
-// CRUD de Usuarios
-router.get('/', messageCtrl.getConversations);
-router.post('/', messageCtrl.createConversation);
-router.get('/:id', messageCtrl.getConversation);
-router.post('/:id', messageCtrl.sendMessage);
-
-
-module.exports = router;
+export const conversationRouter = express.Router();
+conversationRouter.get('/', messageCtrl.getConversations);
+conversationRouter.post('/', messageCtrl.createConversation);
+conversationRouter.get('/:id', messageCtrl.getConversation);
+conversationRouter.post('/:id', messageCtrl.sendMessage);

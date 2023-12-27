@@ -1,5 +1,5 @@
-const Document = require('../models/document');
-const { Storage } = require('@google-cloud/storage');
+import { Storage } from '@google-cloud/storage';
+import Document from '../models/document.js';
 const documentController = {};
 
 const storage = new Storage({
@@ -58,4 +58,4 @@ documentController.downloadDocument = async (req, res, next) => {
   }
 };
 
-module.exports = documentController;
+export default documentController;

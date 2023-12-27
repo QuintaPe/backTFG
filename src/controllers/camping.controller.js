@@ -1,17 +1,15 @@
-const mongoose = require('mongoose');
-
-const Camping = require('../models/camping');
-const CampingLodging = require('../models/campingLodging');
-const CampingUnit = require('../models/campingUnit');
-const CampingRelation = require('../models/campingRelation');
-const NotFound = require('../errors/NotFound');
-const { arrayToObj } = require('../helpers/functions');
+import mongoose from 'mongoose';
+import Camping from '../models/camping.js';
+import CampingUnit from '../models/campingUnit.js';
+import CampingLodging from '../models/campingLodging.js';
+import CampingRelation from '../models/campingRelation.js';
+import { NotFound } from '../errors/NotFound.js';
 
 const campingController = {};
 
 // Get all campings
-campingController.getOwnCampings = async (req, res, next) => {
-  const { page, size, search, filters, sort } = req.query.opts;
+campingController.getOwnCampings = async (req, res) => {
+  const { page, size, filters, sort } = req.query.opts;
 
   const auxFilters = { ...filters };
   if (req.user.role !== 'admin') {
@@ -35,7 +33,7 @@ campingController.getFavoriteCampings = async (req, res, next) => {
   }
 };
 
-campingController.getAvailableCampings = async (req, res, next) => {
+campingController.getAvailableCampings = async (req, res, ) => {
   const { lat, lng, entryDate, exitDate, capacity } = req.query;
   const { page = 0, size = 10000 } = req.query.opts;
   const user = req.user?.id;
@@ -45,7 +43,7 @@ campingController.getAvailableCampings = async (req, res, next) => {
 };
 
 // Get single camping
-campingController.getCamping = async (req, res, next) => {
+campingController.getCamping = async (req, res, ) => {
   const id = req.params.id;
   try {
     const camping = await Camping.findById(id).populate('images').lean();
@@ -59,7 +57,7 @@ campingController.getCamping = async (req, res, next) => {
 };
 
 // Get single camping with his lodgings and their units
-campingController.getFullCamping = async (req, res, next) => {
+campingController.getFullCamping = async (req, res, ) => {
   const id = req.params.id;
   try {
     const camping = await Camping.findById(id).populate('images').lean();
@@ -127,4 +125,4 @@ campingController.deleteCamping = async (req, res, next) => {
   }
 };
 
-module.exports = campingController;
+export default campingController;

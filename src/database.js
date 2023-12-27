@@ -1,7 +1,7 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const MONGODB_URI = `mongodb+srv://${process.env.MONGODB_HOST}/${process.env.MONGODB_DB}`;
-
+console.log(MONGODB_URI);
 mongoose.set('strictQuery', false);
 mongoose
   .connect(MONGODB_URI)

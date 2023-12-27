@@ -1,7 +1,7 @@
-const { Schema, model } = require('mongoose');
-const databaseSchema = require('./database');
-const CampingRelation = require('./campingRelation');
-const { arrayToObj } = require('../helpers/functions');
+import { Schema, model } from 'mongoose';
+import databaseSchema from './database.js';
+import CampingRelation from './campingRelation.js';
+import { arrayToObj } from '../helpers/functions.js';
 
 const BookingSchema = databaseSchema.clone();
 
@@ -68,4 +68,4 @@ BookingSchema.statics.getUserBookings = async function (user, opts) {
   return bookings;
 };
 
-module.exports = model('Booking', BookingSchema);
+export default model('Booking', BookingSchema);

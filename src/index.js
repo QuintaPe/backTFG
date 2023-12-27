@@ -1,20 +1,28 @@
-// Read environment variables
-require('dotenv').config();
+// Initializations
+import './init.js';
+import './database.js';
+import './mailer.js';
 
-const express = require('express');
-const morgan = require('morgan');
-const cors = require('cors');
-const i18n = require('i18n')
-const {
+// Read environment variables
+import express from 'express';
+import morgan from 'morgan';
+import cors from 'cors';
+import i18n from 'i18n';
+
+import { userRouter } from './routes/user.routes.js'
+import { conversationRouter } from './routes/conversation.routes.js'
+import { campingRouter } from './routes/camping.routes.js'
+import { documentRouter } from './routes/document.routes.js'
+import { authRouter } from './routes/auth.routes.js'
+
+import {
   formatQuery,
   authMiddleware,
   errorsMiddleware,
   checkUser,
-} = require('./middlewares');
+} from './middlewares/middlewares.js';
 
 // Initializations
-require('./database');
-require('./mailer');
 const app = express();
 
 // Settings
@@ -31,7 +39,7 @@ app.use(
     origin: 'http://localhost:4200',
     credentials: true,
   })
-  );
+);
 app.use(i18n.init);
 app.use(morgan('dev'));
 app.use(express.json());
@@ -39,11 +47,11 @@ app.use(formatQuery);
 app.use(checkUser);
 
 // Routes
-app.use('/api/v1/users', authMiddleware, require('./routes/user.routes'));
-app.use('/api/v1/conversations', authMiddleware, require('./routes/conversation.routes'));
-app.use('/api/v1/campings', require('./routes/camping.routes'));
-app.use('/api/v1/documents', require('./routes/document.routes'));
-app.use('/api/v1/', require('./routes/auth.routes'));
+app.use('/api/v1/users', authMiddleware, userRouter);
+app.use('/api/v1/conversations', authMiddleware, conversationRouter);
+app.use('/api/v1/campings', campingRouter);
+app.use('/api/v1/documents', documentRouter);
+app.use('/api/v1/', authRouter);
 
 // Error Middleware
 app.use(errorsMiddleware);

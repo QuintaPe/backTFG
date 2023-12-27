@@ -1,13 +1,13 @@
-const Unauthorized = require('../errors/Unauthorized');
-const User = require('../models/user');
-const userCtrl = {};
+import User from '../models/user.js';
+import { Unauthorized } from '../errors/Unauthorized.js';
 
+const userCtrl = {};
 userCtrl.getUsers = async (req, res, next) => {
   try {
     if (req.user.role !== 'admin') {
       throw new Unauthorized();
     }
-    const { page, size, search, filters, sort } = req.query.opts;
+    const { page, size, filters, sort } = req.query.opts;
     const users = await User.search(null, filters, size, page, sort);
     res.json(users);
   } catch (err) {
@@ -44,4 +44,4 @@ userCtrl.deleteUser = async (req, res, next) => {
   }
 };
 
-module.exports = userCtrl;
+export default userCtrl;

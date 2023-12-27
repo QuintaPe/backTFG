@@ -1,15 +1,13 @@
-const express = require('express');
-const router = express.Router();
+import express from 'express';
+import userCtrl from '../controllers/user.controller.js';
+import bookingCtrl from '../controllers/booking.controller.js';
 
-const userCtrl = require('../controllers/user.controller');
-const bookingCtrl = require('../controllers/booking.controller');
+export const userRouter = express.Router();
 
 // CRUD de Usuarios
-router.get('/', userCtrl.getUsers);
-router.get('/:id', userCtrl.getUser);
-router.put('/:id', userCtrl.editUser);
-router.delete('/:id', userCtrl.deleteUser);
+userRouter.get('/', userCtrl.getUsers);
+userRouter.get('/:id', userCtrl.getUser);
+userRouter.put('/:id', userCtrl.editUser);
+userRouter.delete('/:id', userCtrl.deleteUser);
 
-router.get('/:id/bookings', bookingCtrl.getUserBookings);
-
-module.exports = router;
+userRouter.get('/:id/bookings', bookingCtrl.getUserBookings);

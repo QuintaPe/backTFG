@@ -1,5 +1,5 @@
-const nodemailer = require("nodemailer");
-const i18n = require('i18n');
+import nodemailer from "nodemailer";
+import i18n from 'i18n';
 
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
@@ -45,7 +45,7 @@ const emailTemplate = `
   </html>
 `;
 
-async function sendEmail(user, subject, html) {
+export async function sendEmail(user, subject, html) {
   i18n.setLocale(user.lang);
   return transporter.sendMail({
     from: '"Scoutcamp" <scoutcamp.notifications@gmail.com>',
@@ -58,5 +58,3 @@ async function sendEmail(user, subject, html) {
       .replace('{teamMessage}', i18n.__('theScoutcampTeam')),
   });
 }
-
-module.exports = sendEmail;

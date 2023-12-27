@@ -1,14 +1,14 @@
-const Booking = require('../models/booking');
-const Camping = require('../models/camping');
-const User = require('../models/user');
-const CampingUnit = require('../models/campingUnit');
-const CampingLodging = require('../models/campingLodging');
-const i18n = require('i18n');
-const Unauthorized = require('../errors/Unauthorized');
-const HandledError = require('../errors/HandledError');
-const { arrayToObj, daysBetweenDates } = require('../helpers/functions');
-const { formatDate } = require('../helpers/functions');
-const sendEmail = require('../mailer');
+import i18n from 'i18n';
+import Booking from '../models/booking.js';
+import Camping from '../models/camping.js';
+import User from '../models/user.js';
+import CampingUnit from '../models/campingUnit.js';
+import CampingLodging from '../models/campingLodging.js';
+import { Unauthorized } from '../errors/Unauthorized.js';
+import { HandledError } from '../errors/HandledError.js';
+import { arrayToObj, daysBetweenDates } from '../helpers/functions.js';
+import { formatDate } from '../helpers/functions.js';
+import { sendEmail } from '../mailer.js';
 
 const bookingController = {};
 
@@ -31,7 +31,7 @@ bookingController.createBooking = async (req, res, next) => {
         size: lodgings[lodging], fields: ['_id'] }));
       totalCost += totalDays * availableLodgings[lodging].feePerNight * lodgings[lodging]
       
-    };
+    }
     units = await Promise.all(units);
     booking.units = units.flatMap(unit => unit.items);
     booking.totalCost = totalCost;
@@ -119,7 +119,7 @@ bookingController.changeBookingStatus = async (req, res, next) => {
     
     if (!bookingToEdit) {
       throw new HandledError('booking_not_found', 'Booking not found')
-    };
+    }
     
     const isOwner = bookingToEdit.camping.owner.equals(req.user._id);
     const isUser = bookingToEdit.user.equals(req.user._id);
@@ -138,7 +138,7 @@ bookingController.changeBookingStatus = async (req, res, next) => {
 
     if (!canEdit) {
       throw new Unauthorized();
-    };
+    }
 
     i18n.setLocale(receiver.lang);
     await sendEmail(
@@ -160,4 +160,4 @@ bookingController.changeBookingStatus = async (req, res, next) => {
   }
 };
 
-module.exports = bookingController;
+export default bookingController;

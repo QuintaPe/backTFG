@@ -1,6 +1,6 @@
-const mongoose = require('mongoose');
+import { model } from 'mongoose';
+import databaseSchema from './database.js';
 
-const databaseSchema = require('./database');
 const DocumentSchema = databaseSchema.clone();
 DocumentSchema.add({
   name: { type: String, required: true },
@@ -17,4 +17,4 @@ DocumentSchema.getMinInfo = () => ({
   name: this.name,
 });
 
-module.exports = mongoose.model('Document', DocumentSchema);
+export default model('Document', DocumentSchema);

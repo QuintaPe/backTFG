@@ -1,4 +1,4 @@
-const CampingLodging = require('../models/campingLodging');
+import CampingLodging from '../models/campingLodging.js';
 const campingLodgingController = {};
 
 campingLodgingController.getCampingLodgings = async (req, res, next) => {
@@ -28,4 +28,4 @@ campingLodgingController.getAvailableLodgings = async (req, res, next) => {
   }
 };
 
-module.exports = campingLodgingController;
+export default campingLodgingController;

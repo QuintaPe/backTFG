@@ -1,6 +1,6 @@
-const { model, models } = require('mongoose');
+import Mongoose, { model } from 'mongoose';
+import databaseSchema from './database.js';
 
-const databaseSchema = require('./database');
 const UserSchema = databaseSchema.clone();
 UserSchema.add({
   email: { type: String, required: true, lowercase: true },
@@ -17,8 +17,8 @@ UserSchema.add({
 });
 
 UserSchema.path('email').validate(async (email) => {
-  const countEmails = await models.User.countDocuments({ email });
+  const countEmails = await Mongoose.isValidObjectIdmodels.User.countDocuments({ email });
   return !countEmails;
 }, 'Email already exists');
 
-module.exports = model('User', UserSchema);
+export default model('User', UserSchema);
