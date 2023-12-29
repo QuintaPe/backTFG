@@ -42,7 +42,8 @@ export const formatQuery = (req, res, next) => {
   next();
 };
 
-export const errorsMiddleware = (err, req, res) => {
+// eslint-disable-next-line no-unused-vars
+export function errorsMiddleware(err, req, res, next) {
   let error = err;
   if (error?.name == 'ValidationError') {
     const aux = Object.values(error.errors)[0];
@@ -53,4 +54,4 @@ export const errorsMiddleware = (err, req, res) => {
   }
 
   return res.status(error.statusCode).json(error);
-};
+}

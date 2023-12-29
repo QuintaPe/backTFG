@@ -15,12 +15,8 @@ databaseSchema.statics.search = async function (
   lean = false,
 ) {
   function transformSortNotation(inputNotation) {
-    
-    if (!inputNotation || typeof inputNotation !== 'string') return '';
-    
+    if (!inputNotation || typeof inputNotation !== 'string') return {};    
     const sortObject = {};
-    
-    console.log(inputNotation)
     const parts = inputNotation.split(',');
 
     parts.forEach(part => {
@@ -32,7 +28,7 @@ databaseSchema.statics.search = async function (
         sortObject[fieldName] = 1;
       }
     });
-
+    
     return sortObject;
   }
 

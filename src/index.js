@@ -36,7 +36,7 @@ i18n.configure({
 // Middlewares
 app.use(
   cors({
-    origin: 'http://localhost:4200',
+    origin: ['http://localhost:4200', 'scoutcamp.alejandroquintana.dev'],
     credentials: true,
   })
 );
@@ -51,7 +51,7 @@ app.use('/api/v1/users', authMiddleware, userRouter);
 app.use('/api/v1/conversations', authMiddleware, conversationRouter);
 app.use('/api/v1/campings', campingRouter);
 app.use('/api/v1/documents', documentRouter);
-app.use('/api/v1/', authRouter);
+app.use('/api/v1/', authRouter, errorsMiddleware);
 
 // Error Middleware
 app.use(errorsMiddleware);
